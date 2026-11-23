@@ -44,6 +44,16 @@ python -m re_bm.cli scenario data/our_demand.csv --mode global --method average
 `data/our_demand_template.csv`를 복사해 우리 사업장별 전력수요 전망을 넣는다.
 `grid_ef_tco2_per_mwh`를 넣으면 시장기반 Scope 2 배출량도 계산한다. 이 계수는 국가별 잔여믹스 등 회사 기준에 맞는 값을 사용한다.
 
+## 시나리오 계산 툴
+
+```bash
+python -m re_bm.tool      # tool/re_bm_tool.html 생성 (+ data/our_demand_dummy.csv)
+```
+
+브라우저에서 `tool/re_bm_tool.html`을 열면 승인된 경쟁사 데이터로 시나리오를 계산한다.
+적용 기준(전사/국가별), 집계(평균/중앙값/최고치/개별 회사), 포함 회사, 요약 연도를 바꿀 수 있고,
+사업장 수요 가정(현재 더미)을 화면에서 수정하면 바로 다시 계산된다. 계산 규칙은 `scenario.py`와 같다.
+
 ## 구조
 
 ```
