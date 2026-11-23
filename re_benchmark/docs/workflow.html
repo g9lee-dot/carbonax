@@ -1,0 +1,174 @@
+<title>RE 벤치마크 워크플로우</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 한 장짜리 흐름도(왼쪽 열 = 데이터 구축, 오른쪽 열 = 시나리오) + 아래 단계별 명령 표 */
+:root {
+  --bg: #f5f7f6; --panel: #ffffff; --fg: #14201c; --muted: #5b6b65; --line: #c9d4d0;
+  --accent: #0f6b55; --accent-soft: #e2f0eb; --warn: #a15c00; --warn-soft: #fbefdc; --idle: #6b7280; --idle-soft: #eceff1;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1513; --panel: #16201d; --fg: #e4ece9; --muted: #92a39d; --line: #33423d;
+  --accent: #4cc6a2; --accent-soft: #173a30; --warn: #f0b45e; --warn-soft: #3a2c16; --idle: #a3acb3; --idle-soft: #262d31; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e1513; --panel: #16201d; --fg: #e4ece9; --muted: #92a39d; --line: #33423d;
+  --accent: #4cc6a2; --accent-soft: #173a30; --warn: #f0b45e; --warn-soft: #3a2c16; --idle: #a3acb3; --idle-soft: #262d31; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; line-height: 1.6; }
+.wrap { max-width: 1000px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1 { font-size: 22px; margin: 0 0 6px; text-wrap: balance; }
+h2 { font-size: 16px; margin: 32px 0 10px; }
+.lead { color: var(--muted); margin: 0 0 16px; max-width: 68ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chip { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+.done { background: var(--accent-soft); color: var(--accent); }
+.assume { background: var(--warn-soft); color: var(--warn); }
+.wait { background: var(--idle-soft); color: var(--idle); }
+.diagram { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.diagram svg { display: block; min-width: 760px; width: 100%; height: auto; }
+svg text { font-family: var(--font-body); fill: var(--fg); }
+svg .t { font-size: 15px; font-weight: 600; }
+svg .s { font-size: 12px; fill: var(--muted); }
+svg .m { font-family: var(--font-num); font-size: 11px; fill: var(--muted); }
+svg .box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+svg .box.key { stroke: var(--accent); stroke-width: 2; }
+svg .box.dash { stroke-dasharray: 6 5; }
+svg .note { fill: var(--accent-soft); stroke: none; }
+svg .edge { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+svg .arrowhead { fill: var(--muted); }
+svg .c-done rect { fill: var(--accent-soft); } svg .c-done text { fill: var(--accent); }
+svg .c-assume rect { fill: var(--warn-soft); } svg .c-assume text { fill: var(--warn); }
+svg .c-wait rect { fill: var(--idle-soft); } svg .c-wait text { fill: var(--idle); }
+svg .chiptext { font-size: 11px; font-weight: 600; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+code { font-family: var(--font-num); font-size: 12px; background: var(--idle-soft); padding: 1px 5px; border-radius: 4px; white-space: nowrap; }
+td:first-child { white-space: nowrap; font-weight: 600; }
+</style>
+
+<div class="wrap">
+  <h1>RE 벤치마크 워크플로우</h1>
+  <p class="lead">경쟁사 지속가능경영보고서에서 재생에너지 수치를 뽑아 근거와 함께 DB에 쌓고, 승인된 값만으로 우리 회사 RE 시나리오를 계산하는 흐름입니다. 왼쪽 열이 데이터 구축, 오른쪽 열이 시나리오 계산입니다.</p>
+  <div class="legend">
+    <span><span class="chip done">완료</span>지금 동작함</span>
+    <span><span class="chip assume">가정</span>임시로 처리함</span>
+    <span><span class="chip wait">대기</span>나중에 연결</span>
+  </div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 960 700" role="img" aria-label="보고서 수집부터 시나리오 툴까지의 워크플로우">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker>
+      </defs>
+
+      <!-- 왼쪽: 데이터 구축 -->
+      <text x="40" y="18" class="m">데이터 구축</text>
+      <rect class="box" x="40" y="30" width="400" height="66" rx="8"/>
+      <text x="58" y="58" class="t">① 경쟁사 보고서 PDF</text>
+      <text x="58" y="80" class="s">TSMC · SK hynix · Intel · Micron → data/reports/</text>
+      <g class="c-done"><rect x="378" y="42" width="48" height="20" rx="10"/><text x="402" y="56" text-anchor="middle" class="chiptext">완료</text></g>
+
+      <path class="edge" d="M240 96 V124" marker-end="url(#ah)"/>
+      <rect class="box" x="40" y="126" width="400" height="66" rx="8"/>
+      <text x="58" y="154" class="t">② RE 관련 페이지 선별</text>
+      <text x="58" y="176" class="s">재생에너지·PPA·REC·MWh 등 키워드 2회 이상 (예: 132쪽 → 11쪽)</text>
+      <g class="c-done"><rect x="378" y="138" width="48" height="20" rx="10"/><text x="402" y="152" text-anchor="middle" class="chiptext">완료</text></g>
+
+      <path class="edge" d="M240 192 V206 H135 V222" marker-end="url(#ah)"/>
+      <path class="edge" d="M240 192 V206 H345 V222" marker-end="url(#ah)"/>
+      <rect class="box dash" x="40" y="224" width="190" height="80" rx="8"/>
+      <text x="56" y="252" class="t">③ Claude API 추출</text>
+      <text x="56" y="274" class="s">JSON 스키마 강제</text>
+      <text x="56" y="292" class="s">API 키 연결 후 사용</text>
+      <g class="c-wait"><rect x="172" y="282" width="48" height="20" rx="10"/><text x="196" y="296" text-anchor="middle" class="chiptext">대기</text></g>
+      <rect class="box" x="250" y="224" width="190" height="80" rx="8"/>
+      <text x="266" y="252" class="t">③ JSON 직접 작성</text>
+      <text x="266" y="274" class="s">같은 스키마 · --from-json</text>
+      <text x="266" y="292" class="s">현재 4개사 적용</text>
+      <g class="c-done"><rect x="382" y="282" width="48" height="20" rx="10"/><text x="406" y="296" text-anchor="middle" class="chiptext">완료</text></g>
+
+      <path class="edge" d="M135 304 V318 H240 V334" marker-end="url(#ah)"/>
+      <path class="edge" d="M345 304 V318 H240"/>
+      <rect class="box" x="40" y="336" width="400" height="80" rx="8"/>
+      <text x="58" y="364" class="t">④ 자동 점검</text>
+      <text x="58" y="386" class="s">인용문이 그 페이지에 실제로 있는지 대조 (환각 차단)</text>
+      <text x="58" y="404" class="s">단위 환산 · 수단별 합계 · 공시 비율 재계산 · 연도 급변</text>
+      <g class="c-done"><rect x="378" y="348" width="48" height="20" rx="10"/><text x="402" y="362" text-anchor="middle" class="chiptext">완료</text></g>
+
+      <path class="edge" d="M240 416 V444" marker-end="url(#ah)"/>
+      <rect class="box" x="40" y="446" width="400" height="80" rx="8"/>
+      <text x="58" y="474" class="t">⑤ 사람 검토</text>
+      <text x="58" y="496" class="s">review export → Excel에서 승인/반려 → review import</text>
+      <text x="58" y="514" class="s">지금은 "맞다는 전제"로 일괄 승인</text>
+      <g class="c-assume"><rect x="378" y="458" width="48" height="20" rx="10"/><text x="402" y="472" text-anchor="middle" class="chiptext">가정</text></g>
+
+      <path class="edge" d="M240 526 V554" marker-end="url(#ah)"/>
+      <rect class="box key" x="40" y="556" width="400" height="110" rx="8"/>
+      <text x="58" y="584" class="t">⑥ 벤치마크 DB (SQLite)</text>
+      <text x="58" y="606" class="s">실적 · 목표 · PPA 계약, 값마다 보고서 · 페이지 · 원문 인용</text>
+      <text x="58" y="630" class="s">등급  A 공시값 그대로  ·  B 공시값끼리 계산  ·  C 추정</text>
+      <text x="58" y="652" class="m">re_metrics · re_targets · re_contracts</text>
+
+      <!-- 오른쪽: 시나리오 -->
+      <text x="520" y="18" class="m">시나리오 계산</text>
+      <rect class="box" x="520" y="30" width="400" height="66" rx="8"/>
+      <text x="538" y="58" class="t">우리 사업장 전력수요 · 배출계수</text>
+      <text x="538" y="80" class="s">한국 · 중국(시안, 쑤저우) · 미국(오스틴, 테일러)</text>
+      <g class="c-assume"><rect x="858" y="42" width="48" height="20" rx="10"/><text x="882" y="56" text-anchor="middle" class="chiptext">더미</text></g>
+
+      <path class="edge" d="M720 96 V124" marker-end="url(#ah)"/>
+      <path class="edge" d="M440 611 H480 V200 H518" marker-end="url(#ah)"/>
+      <text x="472" y="420" class="m" transform="rotate(-90 472 420)" text-anchor="middle">승인된 A·B 값만</text>
+
+      <rect class="box key" x="520" y="126" width="400" height="160" rx="8"/>
+      <text x="538" y="154" class="t">⑦ 시나리오 엔진</text>
+      <text x="538" y="180" class="s"><tspan class="m">경로</tspan><tspan x="580">최근 실적 → 공시 목표까지 직선, 이후 유지</tspan></text>
+      <text x="538" y="202" class="s"><tspan class="m">집계</tspan><tspan x="580">평균 · 중앙값 · 최고치 · 특정 회사</tspan></text>
+      <text x="538" y="224" class="s"><tspan class="m">적용</tspan><tspan x="580">전사 비율 / 국가별 (공시 없으면 전사로 대체)</tspan></text>
+      <text x="538" y="246" class="s"><tspan class="m">계산</tspan><tspan x="580">필요 RE = 수요 × 벤치마크 비율</tspan></text>
+      <text x="580" y="268" class="s">Scope 2 = (수요 − RE) × 배출계수</text>
+      <g class="c-done"><rect x="858" y="138" width="48" height="20" rx="10"/><text x="882" y="152" text-anchor="middle" class="chiptext">완료</text></g>
+
+      <path class="edge" d="M720 286 V300 H615 V316" marker-end="url(#ah)"/>
+      <path class="edge" d="M720 286 V300 H825 V316" marker-end="url(#ah)"/>
+      <rect class="box" x="520" y="318" width="190" height="80" rx="8"/>
+      <text x="536" y="346" class="t">결과 CSV</text>
+      <text x="536" y="368" class="s">CLI 일괄 계산</text>
+      <text x="536" y="386" class="m">re_bm.cli scenario</text>
+      <rect class="box" x="730" y="318" width="190" height="80" rx="8"/>
+      <text x="746" y="346" class="t">대화형 계산 툴</text>
+      <text x="746" y="368" class="s">조건 바꿔 즉시 재계산</text>
+      <text x="746" y="386" class="m">tool/re_bm_tool.html</text>
+
+      <rect class="note" x="520" y="430" width="400" height="236" rx="8"/>
+      <text x="538" y="460" class="t">시나리오에 들어가는 값의 조건</text>
+      <text x="538" y="490" class="s">· 사람이 승인한 값만 (pending · rejected 제외)</text>
+      <text x="538" y="514" class="s">· A 공시값, B 산출값만 (C 추정값은 쓰지 않음)</text>
+      <text x="538" y="538" class="s">· 국가 값은 경쟁사가 그 국가를 직접 공시했을 때만</text>
+      <text x="538" y="562" class="s">· 결과마다 "국가 공시 / 전사 대체"와 반영 회사 표시</text>
+      <text x="538" y="586" class="s">· 모든 수치는 보고서 페이지와 원문 인용으로 추적</text>
+      <text x="538" y="622" class="s">현재: 한국은 국가 공시가 없어 전사 값으로 대체,</text>
+      <text x="538" y="644" class="s">중국 · 미국은 경쟁사 공시 100%가 적용됨</text>
+    </svg>
+  </div>
+
+  <h2>단계별 실행</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>단계</th><th>하는 일</th><th>명령 / 위치</th><th>상태</th></tr></thead>
+      <tbody>
+        <tr><td>① 수집</td><td>보고서 PDF를 회사 폴더에 넣고 출처를 기록</td><td><code>data/reports/&lt;회사&gt;/</code> <code>SOURCES.md</code></td><td><span class="chip done">완료</span></td></tr>
+        <tr><td>②③ 추출</td><td>RE 페이지를 골라 수치·목표·계약을 정해진 형식으로 추출</td><td><code>re_bm.cli extract … --from-json</code></td><td><span class="chip done">JSON 완료</span> <span class="chip wait">API 대기</span></td></tr>
+        <tr><td>④ 자동 점검</td><td>인용문 대조, 단위 환산, 합계·비율·급변 점검</td><td><code>re_bm/validate.py</code></td><td><span class="chip done">완료</span></td></tr>
+        <tr><td>⑤ 검토</td><td>검토 CSV에서 승인/반려, 값 수정</td><td><code>re_bm.cli review export</code> / <code>import</code></td><td><span class="chip assume">일괄 승인 가정</span></td></tr>
+        <tr><td>⑥ DB</td><td>근거·등급과 함께 저장, 미공시 비율은 B등급으로 산출</td><td><code>data/re_benchmark.db</code> <code>re_bm.cli derive</code></td><td><span class="chip done">완료</span></td></tr>
+        <tr><td>⑦ 시나리오</td><td>경쟁사 경로를 우리 사업장 수요에 적용</td><td><code>re_bm.cli scenario</code> <code>python -m re_bm.tool</code></td><td><span class="chip done">완료</span> <span class="chip assume">수요 더미</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
