@@ -3,9 +3,10 @@
 _ENERGY_TO_MWH = {
     "kwh": 1e-3, "mwh": 1.0, "gwh": 1e3, "twh": 1e6,
     "gj": 1 / 3.6, "tj": 1e3 / 3.6, "pj": 1e6 / 3.6,
-    "천kwh": 1.0, "백만kwh": 1e3, "억kwh": 1e5,
+    "millionkwh": 1e3, "billionkwh": 1e6, "천kwh": 1.0, "백만kwh": 1e3, "억kwh": 1e5,
 }
-_EMISSION_TO_T = {"tco2e": 1.0, "ktco2e": 1e3, "mtco2e": 1e6, "천tco2e": 1e3, "만tco2e": 1e4, "백만tco2e": 1e6}
+_EMISSION_TO_T = {"tco2e": 1.0, "ktco2e": 1e3, "mtco2e": 1e6, "천tco2e": 1e3, "만tco2e": 1e4, "백만tco2e": 1e6,
+                 "metrictonsco2e": 1.0, "millionmetrictonsco2e": 1e6, "thousandmetrictonsco2e": 1e3}
 
 
 def _key(unit: str) -> str:
