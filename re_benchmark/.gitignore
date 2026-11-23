@@ -1,5 +1,4 @@
 data/*.db
-data/reports/
 data/review/
 data/output/
 __pycache__/
