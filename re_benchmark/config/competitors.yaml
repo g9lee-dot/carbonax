@@ -1,0 +1,15 @@
+# 벤치마크 대상 경쟁사. 추가 시 항목만 늘리면 된다.
+# 보고서 PDF는 data/reports/<company_id>/ 아래에 넣는다 (예: data/reports/tsmc/2025_sustainability_report.pdf)
+companies:
+  - company_id: tsmc
+    name: TSMC
+    hq_country: TW
+  - company_id: skhynix
+    name: SK hynix
+    hq_country: KR
+  - company_id: intel
+    name: Intel
+    hq_country: US
+  - company_id: micron
+    name: Micron Technology
+    hq_country: US
