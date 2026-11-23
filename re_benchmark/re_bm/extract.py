@@ -133,23 +133,29 @@ def call_claude(company: str, pages: list[str], page_nums: list[int]) -> Extract
     return msg.parsed_output
 
 
-def load_report(conn, company_id: str, pdf_path: Path, publication_year: int, batch_size: int = 40) -> int:
-    """PDF 한 개를 추출해 pending 상태로 적재. report_id 반환."""
+def load_report(conn, company_id: str, pdf_path: Path, publication_year: int, batch_size: int = 40,
+                json_path: Path | None = None) -> int:
+    """PDF 한 개를 추출해 pending 상태로 적재. report_id 반환.
+    json_path 를 주면 API 대신 그 파일(Extraction 스키마 JSON; 수작업/세션 추출본)을 사용한다."""
     sha = _sha256(pdf_path)
     if conn.execute("SELECT 1 FROM reports WHERE sha256=?", (sha,)).fetchone():
         raise ValueError(f"Already loaded: {pdf_path}")
-
-    pages = read_pages(pdf_path)
-    selected = select_pages(pages)
-    if not selected:
-        raise ValueError("No renewable-energy pages found (scanned PDF? OCR may be needed).")
 
     company = conn.execute("SELECT name FROM companies WHERE company_id=?", (company_id,)).fetchone()
     if not company:
         raise ValueError(f"Unknown company_id {company_id}; add it to config/competitors.yaml and run init.")
 
-    results = [call_claude(company["name"], pages, selected[i:i + batch_size])
-               for i in range(0, len(selected), batch_size)]
+    pages = read_pages(pdf_path)
+    if json_path is not None:
+        results = [Extraction.model_validate_json(Path(json_path).read_text(encoding="utf-8"))]
+        by = f"manual:{Path(json_path).name}"
+    else:
+        selected = select_pages(pages)
+        if not selected:
+            raise ValueError("No renewable-energy pages found (scanned PDF? OCR may be needed).")
+        results = [call_claude(company["name"], pages, selected[i:i + batch_size])
+                   for i in range(0, len(selected), batch_size)]
+        by = f"llm:{MODEL}"
 
     cur = conn.execute(
         "INSERT INTO reports(company_id, publication_year, title, file_path, sha256, assurance, boundary_note) "
@@ -159,7 +165,6 @@ def load_report(conn, company_id: str, pdf_path: Path, publication_year: int, ba
          next((r.boundary_note for r in results if r.boundary_note), None)),
     )
     report_id = cur.lastrowid
-    by = f"llm:{MODEL}"
 
     for r in results:
         for m in r.metrics:

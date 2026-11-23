@@ -5,8 +5,9 @@ _ENERGY_TO_MWH = {
     "gj": 1 / 3.6, "tj": 1e3 / 3.6, "pj": 1e6 / 3.6,
     "millionkwh": 1e3, "billionkwh": 1e6, "천kwh": 1.0, "백만kwh": 1e3, "억kwh": 1e5,
 }
-_EMISSION_TO_T = {"tco2e": 1.0, "ktco2e": 1e3, "mtco2e": 1e6, "천tco2e": 1e3, "만tco2e": 1e4, "백만tco2e": 1e6,
-                 "metrictonsco2e": 1.0, "millionmetrictonsco2e": 1e6, "thousandmetrictonsco2e": 1e3}
+# "MtCO2e"/"MTCO2e" 는 회사마다 백만톤/메트릭톤으로 뜻이 달라 자동 환산하지 않는다 (검토 대상).
+_EMISSION_TO_T = {"tco2e": 1.0, "ktco2e": 1e3, "천tco2e": 1e3, "만tco2e": 1e4, "백만tco2e": 1e6,
+                 "metrictonsco2e": 1.0, "metrictonco2e": 1.0, "millionmetrictonsco2e": 1e6, "thousandmetrictonsco2e": 1e3}
 
 
 def _key(unit: str) -> str:

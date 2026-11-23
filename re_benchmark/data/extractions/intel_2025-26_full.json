@@ -1,0 +1,184 @@
+{
+ "assurance": "Apex Companies LLC limited assurance (CY2025): Scope 1/2(location·market), Renewable Electricity Percentage, Energy Use 등 (p.57)",
+ "boundary_note": "역년(CY) 기준. 국가별 RE%는 본문(p.32) 및 사업장별 인벤토리(p.62). Europe=Ireland·Poland(p.62). 조달 수단: 온·오프사이트 발전, 유틸리티 RE 구매, REC 등 green attributes(Green-e 인증 다수) — 수단별 물량 미공시(p.36).",
+ "metrics": [
+  {
+   "data_year": 2025,
+   "geography": "GLOBAL",
+   "geography_level": "global",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 99,
+   "unit": "%",
+   "page": 58,
+   "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+  },
+  {
+   "data_year": 2024,
+   "geography": "GLOBAL",
+   "geography_level": "global",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 98,
+   "unit": "%",
+   "page": 58,
+   "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+  },
+  {
+   "data_year": 2023,
+   "geography": "GLOBAL",
+   "geography_level": "global",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 99,
+   "unit": "%",
+   "page": 58,
+   "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+  },
+  {
+   "data_year": 2022,
+   "geography": "GLOBAL",
+   "geography_level": "global",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 93,
+   "unit": "%",
+   "page": 58,
+   "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+  },
+  {
+   "data_year": 2021,
+   "geography": "GLOBAL",
+   "geography_level": "global",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 80,
+   "unit": "%",
+   "page": 58,
+   "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+  },
+  {
+   "data_year": 2025,
+   "geography": "US",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 100,
+   "unit": "%",
+   "page": 32,
+   "quote": "In 2025, we achieved 100% renewable electricity for our U.S., Europe, Israel, Malaysia,"
+  },
+  {
+   "data_year": 2025,
+   "geography": "IL",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 100,
+   "unit": "%",
+   "page": 32,
+   "quote": "In 2025, we achieved 100% renewable electricity for our U.S., Europe, Israel, Malaysia,"
+  },
+  {
+   "data_year": 2025,
+   "geography": "MY",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 100,
+   "unit": "%",
+   "page": 32,
+   "quote": "In 2025, we achieved 100% renewable electricity for our U.S., Europe, Israel, Malaysia,"
+  },
+  {
+   "data_year": 2025,
+   "geography": "VN",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 100,
+   "unit": "%",
+   "page": 32,
+   "quote": "Vietnam, and China locations, and 97% in Costa Rica, bringing the global total to 99%."
+  },
+  {
+   "data_year": 2025,
+   "geography": "CN",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 100,
+   "unit": "%",
+   "page": 32,
+   "quote": "Vietnam, and China locations, and 97% in Costa Rica, bringing the global total to 99%."
+  },
+  {
+   "data_year": 2025,
+   "geography": "CR",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 97,
+   "unit": "%",
+   "page": 32,
+   "quote": "Vietnam, and China locations, and 97% in Costa Rica, bringing the global total to 99%."
+  },
+  {
+   "data_year": 2025,
+   "geography": "IE",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 100,
+   "unit": "%",
+   "page": 62,
+   "quote": "Ireland Leixlip 142,100 54,300 200 37,400 1,100 235,200 – 100% 235,200"
+  },
+  {
+   "data_year": 2025,
+   "geography": "PL",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 100,
+   "unit": "%",
+   "page": 62,
+   "quote": "Poland Gdansk – 1,000 – – 200 1,200 – 100% 1,200"
+  },
+  {
+   "data_year": 2025,
+   "geography": "IN",
+   "geography_level": "country",
+   "metric": "re_ratio",
+   "instrument": null,
+   "value": 0,
+   "unit": "%",
+   "page": 62,
+   "quote": "India Bangalore, Sarjapur – 600 – – 1,000 1,600 38,100 0% 39,700"
+  },
+  {
+   "data_year": 2025,
+   "geography": "GLOBAL",
+   "geography_level": "global",
+   "metric": "scope2_market_based",
+   "instrument": null,
+   "value": 49000,
+   "unit": "metric tons CO2e",
+   "page": 62,
+   "quote": "Total4 658,700 328,300 102,700 175,900 8,400 1,274,000 49,000 99% 1,323,000"
+  }
+ ],
+ "targets": [
+  {
+   "geography": "GLOBAL",
+   "target_year": 2030,
+   "target_re_ratio": 100,
+   "base_year": null,
+   "initiative": null,
+   "scope_note": "100% renewable electricity across global operations",
+   "page": 36,
+   "quote": "Our 2030 goal is to achieve 100% renewable electricity across our global"
+  }
+ ],
+ "contracts": []
+}

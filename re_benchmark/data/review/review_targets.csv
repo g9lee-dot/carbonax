@@ -1,0 +1,8 @@
+﻿target_id,company_id,geography,target_year,target_re_ratio,base_year,initiative,scope_note,page,quote,quote_verified,review_status,reviewer,review_note
+2,intel,GLOBAL,2030,100.0,,,100% renewable electricity across global operations,36,Our 2030 goal is to achieve 100% renewable electricity across our global,1,pending,,
+1,micron,US,2025,100.0,,,"U.S. operations, end of CY25 (achieved). 장기 aspiration: 100% carbon-free electricity globally, where available (연도 미기재)",35,100% renewable electricity in the U.S.,1,pending,,
+4,skhynix,GLOBAL,2026,31.0,,RE100,연도별 목표,25,2026 31.0% -,1,pending,,
+3,skhynix,GLOBAL,2030,33.0,2020,RE100,2030 중간 목표,23,재생에너지 사용률 33% 달성을 중간 목표로 수립했습니다.,1,pending,,
+5,skhynix,GLOBAL,2050,100.0,,RE100,장기 목표(넷제로와 함께),23,SK하이닉스는 2050년까지 넷제로 및 RE100 달성을 장기 목표로 설정하고,1,pending,,
+6,tsmc,GLOBAL,2030,60.0,,RE100,RE60: all company operational sites. 목표연도 2030은 p.5 로드맵(RE60이 2030 위치) 기준 — 검토 시 본 보고서로 확인 필요,39,60% of the electricity consumption at all company operational sites comes from,1,pending,,
+7,tsmc,GLOBAL,2040,100.0,,RE100,RE100 by 2040,15,Commit to achieving RE100 by 2040,1,pending,,

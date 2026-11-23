@@ -1,0 +1,34 @@
+{
+  "assurance": null,
+  "boundary_note": "FY 기준(FY25=2024.9~2025.8, FY24부터 회계연도; CY22·CY23은 역년). 단위 MTCO2e=metric ton CO2e(p.93 각주2). FY25 RE 총량에는 고객에게 우선 배분된 683,641 MWh 포함, 미배분 RE는 총 전력공급의 5.9%(p.92 각주5). SASB 표의 'percentage renewable energy 10%'는 총에너지 기준(p.88), 전력 기준 RE 비율은 13%.",
+  "metrics": [
+    {"data_year": 2022, "geography": "GLOBAL", "geography_level": "global", "metric": "re_electricity", "instrument": "unspecified", "value": 200141, "unit": "MWh", "page": 92, "quote": "Purchased renewable electricity MWh 200,141 393,561 783,604 1,260,476"},
+    {"data_year": 2023, "geography": "GLOBAL", "geography_level": "global", "metric": "re_electricity", "instrument": "unspecified", "value": 393561, "unit": "MWh", "page": 92, "quote": "Purchased renewable electricity MWh 200,141 393,561 783,604 1,260,476"},
+    {"data_year": 2024, "geography": "GLOBAL", "geography_level": "global", "metric": "re_electricity", "instrument": "unspecified", "value": 783604, "unit": "MWh", "page": 92, "quote": "Purchased renewable electricity MWh 200,141 393,561 783,604 1,260,476"},
+    {"data_year": 2025, "geography": "GLOBAL", "geography_level": "global", "metric": "re_electricity", "instrument": "unspecified", "value": 1260476, "unit": "MWh", "page": 92, "quote": "Purchased renewable electricity MWh 200,141 393,561 783,604 1,260,476"},
+    {"data_year": 2022, "geography": "GLOBAL", "geography_level": "global", "metric": "re_electricity", "instrument": "onsite", "value": 223, "unit": "MWh", "page": 92, "quote": "MWh 223 245 270 938"},
+    {"data_year": 2023, "geography": "GLOBAL", "geography_level": "global", "metric": "re_electricity", "instrument": "onsite", "value": 245, "unit": "MWh", "page": 92, "quote": "MWh 223 245 270 938"},
+    {"data_year": 2024, "geography": "GLOBAL", "geography_level": "global", "metric": "re_electricity", "instrument": "onsite", "value": 270, "unit": "MWh", "page": 92, "quote": "MWh 223 245 270 938"},
+    {"data_year": 2025, "geography": "GLOBAL", "geography_level": "global", "metric": "re_electricity", "instrument": "onsite", "value": 938, "unit": "MWh", "page": 92, "quote": "MWh 223 245 270 938"},
+    {"data_year": 2022, "geography": "GLOBAL", "geography_level": "global", "metric": "re_ratio", "instrument": null, "value": 2, "unit": "%", "page": 92, "quote": "Renewable electricity consumed % 2% 4% 9% 13%"},
+    {"data_year": 2023, "geography": "GLOBAL", "geography_level": "global", "metric": "re_ratio", "instrument": null, "value": 4, "unit": "%", "page": 92, "quote": "Renewable electricity consumed % 2% 4% 9% 13%"},
+    {"data_year": 2024, "geography": "GLOBAL", "geography_level": "global", "metric": "re_ratio", "instrument": null, "value": 9, "unit": "%", "page": 92, "quote": "Renewable electricity consumed % 2% 4% 9% 13%"},
+    {"data_year": 2025, "geography": "GLOBAL", "geography_level": "global", "metric": "re_ratio", "instrument": null, "value": 13, "unit": "%", "page": 92, "quote": "Renewable electricity consumed % 2% 4% 9% 13%"},
+    {"data_year": 2025, "geography": "US", "geography_level": "country", "metric": "re_ratio", "instrument": null, "value": 100, "unit": "%", "page": 35, "quote": "100% renewable electricity in the U.S. as of the end of CY25"},
+    {"data_year": 2025, "geography": "MY", "geography_level": "country", "metric": "re_ratio", "instrument": null, "value": 100, "unit": "%", "page": 35, "quote": "100% renewable electricity in Malaysia2"},
+    {"data_year": 2025, "geography": "CN", "geography_level": "country", "metric": "re_ratio", "instrument": null, "value": 100, "unit": "%", "page": 35, "quote": "100% renewable electricity in mainland China2"},
+    {"data_year": 2022, "geography": "GLOBAL", "geography_level": "global", "metric": "scope2_market_based", "instrument": null, "value": 4132206, "unit": "metric ton CO2e", "page": 93, "quote": "MTCO2e 4,132,206 4,138,062 4,002,529 3,820,977"},
+    {"data_year": 2023, "geography": "GLOBAL", "geography_level": "global", "metric": "scope2_market_based", "instrument": null, "value": 4138062, "unit": "metric ton CO2e", "page": 93, "quote": "MTCO2e 4,132,206 4,138,062 4,002,529 3,820,977"},
+    {"data_year": 2024, "geography": "GLOBAL", "geography_level": "global", "metric": "scope2_market_based", "instrument": null, "value": 4002529, "unit": "metric ton CO2e", "page": 93, "quote": "MTCO2e 4,132,206 4,138,062 4,002,529 3,820,977"},
+    {"data_year": 2025, "geography": "GLOBAL", "geography_level": "global", "metric": "scope2_market_based", "instrument": null, "value": 3820977, "unit": "metric ton CO2e", "page": 93, "quote": "MTCO2e 4,132,206 4,138,062 4,002,529 3,820,977"}
+  ],
+  "targets": [
+    {"geography": "US", "target_year": 2025, "target_re_ratio": 100, "base_year": null, "initiative": null, "scope_note": "U.S. operations, end of CY25 (achieved). 장기 aspiration: 100% carbon-free electricity globally, where available (연도 미기재)", "page": 35, "quote": "100% renewable electricity in the U.S."}
+  ],
+  "contracts": [
+    {"country": "US", "instrument": "ppa_physical", "technology": "solar", "capacity_mw": 40, "annual_mwh": 77000, "term_years": null, "start_year": null, "counterparty": "Idaho Power (Black Mesa, Idaho)", "page": 38, "quote": "provides approximately 77 million kWh of renewable"},
+    {"country": "US", "instrument": "ppa_virtual", "technology": "solar", "capacity_mw": 70, "annual_mwh": null, "term_years": null, "start_year": 2025, "counterparty": "7V Solar Ranch (Texas)", "page": 38, "quote": "with 70 MW from the 7V Solar Ranch and 168 MW from"},
+    {"country": "US", "instrument": "ppa_virtual", "technology": "solar", "capacity_mw": 168, "annual_mwh": null, "term_years": null, "start_year": 2025, "counterparty": "Grimes County Solar (Texas)", "page": 38, "quote": "with 70 MW from the 7V Solar Ranch and 168 MW from"},
+    {"country": "MY", "instrument": "green_tariff", "technology": null, "capacity_mw": null, "annual_mwh": null, "term_years": null, "start_year": null, "counterparty": "Green Electricity Tariff program", "page": 38, "quote": "Green Electricity Tariff program"}
+  ]
+}

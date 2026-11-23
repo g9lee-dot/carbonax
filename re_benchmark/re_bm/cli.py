@@ -15,6 +15,7 @@ def main():
     e.add_argument("company_id")
     e.add_argument("pdf", type=Path)
     e.add_argument("--year", type=int, required=True, help="보고서 발간연도")
+    e.add_argument("--from-json", type=Path, help="API 대신 Extraction 스키마 JSON 파일로 적재")
 
     r = sub.add_parser("review", help="검토 CSV 내보내기/반영")
     r.add_argument("action", choices=["export", "import"])
@@ -35,7 +36,7 @@ def main():
         db.init_db(conn)
         print(f"initialized {a.db}")
     elif a.cmd == "extract":
-        rid = extract.load_report(conn, a.company_id, a.pdf, a.year)
+        rid = extract.load_report(conn, a.company_id, a.pdf, a.year, json_path=a.from_json)
         n = conn.execute("SELECT COUNT(*) FROM re_metrics WHERE report_id=?", (rid,)).fetchone()[0]
         print(f"report_id={rid}: {n} metrics loaded as pending. Next: review export")
     elif a.cmd == "review":

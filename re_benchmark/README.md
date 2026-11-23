@@ -32,6 +32,8 @@ export ANTHROPIC_API_KEY=...            # 추출 단계에만 필요
 
 python -m re_bm.cli init
 python -m re_bm.cli extract intel data/reports/intel/2025_csr.pdf --year 2025
+# API 없이: 직접 작성한 Extraction JSON 으로 적재 (data/extractions/*.json)
+python -m re_bm.cli extract micron data/reports/micron/Micron_2026_Sustainability_Report.pdf --year 2026 --from-json data/extractions/micron_2026.json
 python -m re_bm.cli review export        # data/review/*.csv 를 Excel로 검토
 #   review_status 열에 approved 또는 rejected, reviewer 열에 검토자 이름 기입. 값이 틀렸으면 value_reported / unit_reported 를 수정
 python -m re_bm.cli review import
