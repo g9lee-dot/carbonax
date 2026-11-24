@@ -54,6 +54,19 @@ python -m re_bm.tool      # tool/re_bm_tool.html 생성 (+ data/our_demand_dummy
 적용 기준(전사/국가별), 집계(평균/중앙값/최고치/개별 회사), 포함 회사, 요약 연도를 바꿀 수 있고,
 사업장 수요 가정(현재 더미)을 화면에서 수정하면 바로 다시 계산된다. 계산 규칙은 `scenario.py`와 같다.
 
+## 경쟁사 BM 경로 생성기 (수요 없이 경로만)
+
+우리 회사 수요·배출계수 없이, 경쟁사 공시값만으로 연도·지역별 벤치마크 RE 비율 경로를 만든다.
+RE 시뮬레이터 등 다른 도구에 목표로 넘길 때 쓴다.
+
+```bash
+python -m re_bm.cli bm-path --from-year 2025 --to-year 2040 --geos GLOBAL,KR,CN,US,TW --mode country --method average
+# → data/output/bm_path_average_country.csv  (연도·지역 한 줄, 경쟁사별 값 포함)
+# → data/output/bm_path_average_country.json (시나리오 패키지: 경로 + 근거)
+```
+
+화면 툴은 `python -m re_bm.tool`이 함께 만드는 `tool/bm_path_tool.html`이다 (CSV / JSON 복사 가능).
+
 ## 구조
 
 ```
