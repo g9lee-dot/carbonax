@@ -1,0 +1,296 @@
+<title>경쟁사 RE 수준 비교</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 좌측 조건 + 우측(기준연도 수준 비교 막대 → 경로 차트 → 연도별 표 → 내보내기 → 각주). 좁은 화면은 한 열. */
+:root {
+  --bg: #f5f7f6; --panel: #ffffff; --fg: #14201c; --muted: #5b6b65; --line: #dde4e1; --band: #e6ece9;
+  --accent: #0f6b55; --accent-soft: #e2f0eb; --warn: #a15c00; --warn-soft: #fbefdc;
+  --c-tsmc: #c2410c; --c-skhynix: #b91c4a; --c-intel: #1d5fb8; --c-micron: #6b4fb0; --c-ind: #14201c;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1513; --panel: #16201d; --fg: #e4ece9; --muted: #92a39d; --line: #2a3733; --band: #1f2b27;
+  --accent: #4cc6a2; --accent-soft: #173a30; --warn: #f0b45e; --warn-soft: #3a2c16;
+  --c-tsmc: #fb8a4c; --c-skhynix: #f2668f; --c-intel: #6ea8f5; --c-micron: #b39af0; --c-ind: #e4ece9; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e1513; --panel: #16201d; --fg: #e4ece9; --muted: #92a39d; --line: #2a3733; --band: #1f2b27;
+  --accent: #4cc6a2; --accent-soft: #173a30; --warn: #f0b45e; --warn-soft: #3a2c16;
+  --c-tsmc: #fb8a4c; --c-skhynix: #f2668f; --c-intel: #6ea8f5; --c-micron: #b39af0; --c-ind: #e4ece9; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; line-height: 1.55; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin-bottom: 20px; }
+h1 { font-size: 22px; font-weight: 700; margin: 0; text-wrap: balance; }
+h2 { font-size: 15px; font-weight: 600; margin: 0; }
+h3 { font-size: 13px; font-weight: 600; margin: 16px 0 8px; }
+.sub { color: var(--muted); margin: -12px 0 20px; max-width: 72ch; }
+.pill { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.ok { background: var(--accent-soft); color: var(--accent); }
+.grid { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.stack { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+aside.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: flex; flex-direction: column; gap: 18px; }
+@media (max-width: 860px) { aside.panel { position: static; } }
+fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+legend { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .04em; margin-bottom: 6px; padding: 0; }
+.check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.swatch.line { height: 3px; border-radius: 0; }
+.range { display: flex; align-items: center; gap: 8px; }
+select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; min-width: 0; }
+.range select { flex: 1; }
+select:focus-visible, input:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+.row-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+.bars { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: 8px 12px; align-items: center; }
+.bars .name { font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.bars .name small { color: var(--muted); font-size: 11.5px; }
+.bars .track { height: 18px; background: var(--band); border-radius: 4px; overflow: hidden; }
+.bars .fill { height: 100%; border-radius: 4px; }
+.bars .val { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; min-width: 5ch; }
+.bars .ind .name { font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--muted); font-family: var(--font-num); font-size: 11px; }
+svg .grid-l { stroke: var(--line); stroke-width: 1; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; }
+th:first-child, td:first-child, td.l, th.l { text-align: left; }
+td.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+tr.sel td { background: var(--accent-soft); }
+th.ind, td.ind { font-weight: 600; }
+td.by { color: var(--muted); font-size: 11.5px; text-align: left; }
+button { font: inherit; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.status { font-size: 12px; color: var(--muted); }
+pre.preview { margin: 10px 0 0; max-height: 200px; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-family: var(--font-num); font-size: 11.5px; white-space: pre; }
+.foot { font-size: 13px; color: var(--muted); }
+.foot ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.foot b { color: var(--fg); }
+details summary { cursor: pointer; font-weight: 600; }
+.ev td, #regional td { white-space: normal; vertical-align: top; }
+.ev td.q { color: var(--muted); font-size: 12px; min-width: 240px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>경쟁사 RE 수준 비교</h1>
+    <span class="pill ok">입력: 경쟁사 공시값만 · 전사 RE 전력 비율</span>
+    <span class="pill warn">데이터: 일괄 승인 가정 (검토 전)</span>
+  </header>
+  <p class="sub">업계 최고 · 평균 · 최저 수준과 TSMC · SK hynix · Intel · Micron 각 사 수준을 연도별 RE 전력 비율 경로로 나란히 비교합니다. 각 경로는 공시 실적에서 공시 목표까지 이은 것이며, 우리 회사 수요는 쓰지 않습니다. 지역별 정보는 각주에 정리했습니다.</p>
+
+  <div class="grid">
+    <aside class="panel" aria-label="비교 조건">
+      <fieldset>
+        <legend>기준 연도</legend>
+        <select id="kpi-year" aria-label="기준 연도"></select>
+      </fieldset>
+      <fieldset>
+        <legend>연도 범위</legend>
+        <div class="range"><select id="from" aria-label="시작 연도"></select><span>~</span><select id="to" aria-label="끝 연도"></select></div>
+      </fieldset>
+      <fieldset><legend>표시할 시나리오</legend><div id="scen"></div></fieldset>
+      <fieldset><legend>업계 수준 계산에 포함할 회사</legend><div id="cos"></div></fieldset>
+      <p class="hint">업계 최고 · 평균 · 최저는 연도마다 포함한 회사 경로 중 최고값, 평균, 최저값입니다. 목표를 공시하지 않은 회사는 최근 실적이 유지됩니다(각주 2).</p>
+    </aside>
+
+    <div class="stack">
+      <section class="panel">
+        <div class="row-head"><h2 id="bars-title">수준 비교</h2><span class="status">전사 RE 전력 비율</span></div>
+        <div class="bars" id="bars"></div>
+      </section>
+
+      <section class="panel">
+        <div class="row-head"><h2>연도별 경로 (%)</h2></div>
+        <div id="chart"></div>
+        <div class="legend" id="legend"></div>
+      </section>
+
+      <section class="panel">
+        <div class="row-head"><h2>연도별 수준 (%)</h2><span class="status">회색 글씨 = 그 해 최고·최저를 정한 회사</span></div>
+        <div class="scroll"><table id="table"></table></div>
+      </section>
+
+      <section class="panel">
+        <div class="row-head"><h2>내보내기</h2>
+          <div class="btns"><button type="button" id="copy-csv">CSV 복사</button><button type="button" id="copy-json">JSON 시나리오 패키지 복사</button><span class="status" id="copy-status" aria-live="polite"></span></div></div>
+        <p class="hint">CSV는 연도별 한 줄(시나리오별 열), JSON은 시나리오별 경로와 근거·지역 각주를 담은 패키지입니다.</p>
+        <pre class="preview" id="preview"></pre>
+      </section>
+
+      <section class="panel foot" aria-label="각주">
+        <h2>각주</h2>
+        <ol>
+          <li><b>지역 정보는 시나리오에 반영하지 않았습니다.</b> 아래는 경쟁사가 국가·권역 단위로 공시한 RE 비율입니다(최신 연도). 한국 값을 따로 공시한 경쟁사는 없습니다.
+            <div class="scroll" style="margin-top:8px"><table id="regional"></table></div></li>
+          <li><b>목표가 없는 회사</b>는 최근 실적이 그대로 유지됩니다. 현재 Micron은 전사 수치 목표가 없어(미국 100%만 공시) 13%로 유지되고, 이 때문에 업계 최저가 계속 Micron 13%로 나옵니다.</li>
+          <li><b>보고 경계 차이.</b> Micron은 회계연도(FY25 = 2024년 9월~2025년 8월) 기준이며, 13%에는 고객사에 우선 배분한 RE가 포함됩니다(미배분분은 5.9%). SK hynix 데이터 범위는 이천·청주·분당·서울·우시·충칭입니다. TSMC는 본 보고서 대신 2025 Climate and Nature Report를 썼고, 2030년 60% 목표의 연도는 로드맵 그림 기준이라 확인이 필요합니다.</li>
+          <li>경로의 직선 보간은 가정입니다. 회계연도(Micron, 9월~8월)와 역년 차이는 보정하지 않았습니다.</li>
+        </ol>
+        <details style="margin-top:14px">
+          <summary>근거 데이터 (보고서 페이지 · 원문 인용)</summary>
+          <div class="scroll" style="margin-top:10px"><table class="ev" id="evidence"></table></div>
+        </details>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"bm": {"companies": {"tsmc": "TSMC", "skhynix": "SK hynix", "intel": "Intel", "micron": "Micron Technology"}, "actual": {"GLOBAL": {"micron": {"2022": 2.0, "2023": 4.0, "2024": 9.0, "2025": 13.0}, "intel": {"2025": 99.0, "2024": 98.0, "2023": 99.0, "2022": 93.0, "2021": 80.0}, "skhynix": {"2022": 29.6, "2023": 30.0, "2024": 29.9, "2025": 31.0}, "tsmc": {"2025": 20.1}}, "US": {"micron": {"2025": 100.0}, "intel": {"2025": 100.0}}, "MY": {"micron": {"2025": 100.0}, "intel": {"2025": 100.0}}, "CN": {"micron": {"2025": 100.0}, "intel": {"2025": 100.0}, "skhynix": {"2025": 100.0}}, "IL": {"intel": {"2025": 100.0}}, "VN": {"intel": {"2025": 100.0}}, "CR": {"intel": {"2025": 97.0}}, "IE": {"intel": {"2025": 100.0}}, "PL": {"intel": {"2025": 100.0}}, "IN": {"intel": {"2025": 0.0}}, "TW": {"tsmc": {"2025": 11.5}}, "OVERSEAS": {"tsmc": {"2025": 100.0}}}, "targets": {"US": {"micron": {"2025": 100.0}}, "GLOBAL": {"intel": {"2030": 100.0}, "skhynix": {"2030": 33.0, "2026": 31.0, "2050": 100.0}, "tsmc": {"2030": 60.0, "2040": 100.0}}}, "evidence": [{"co": "intel", "geo": "GLOBAL", "kind": "목표", "year": 2030, "value": 100.0, "page": 36, "quote": "Our 2030 goal is to achieve 100% renewable electricity across our global", "report": "Intel_CSR_2025-26_Full_Report", "note": "100% renewable electricity across global operations"}, {"co": "intel", "geo": "GLOBAL", "kind": "실적", "year": 2021, "value": 80.0, "page": 58, "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "GLOBAL", "kind": "실적", "year": 2022, "value": 93.0, "page": 58, "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "GLOBAL", "kind": "실적", "year": 2023, "value": 99.0, "page": 58, "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "GLOBAL", "kind": "실적", "year": 2024, "value": 98.0, "page": 58, "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "GLOBAL", "kind": "실적", "year": 2025, "value": 99.0, "page": 58, "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "CN", "kind": "실적", "year": 2025, "value": 100.0, "page": 32, "quote": "Vietnam, and China locations, and 97% in Costa Rica, bringing the global total to 99%.", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "CR", "kind": "실적", "year": 2025, "value": 97.0, "page": 32, "quote": "Vietnam, and China locations, and 97% in Costa Rica, bringing the global total to 99%.", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "IE", "kind": "실적", "year": 2025, "value": 100.0, "page": 62, "quote": "Ireland Leixlip 142,100 54,300 200 37,400 1,100 235,200 – 100% 235,200", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "IL", "kind": "실적", "year": 2025, "value": 100.0, "page": 32, "quote": "In 2025, we achieved 100% renewable electricity for our U.S., Europe, Israel, Malaysia,", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "IN", "kind": "실적", "year": 2025, "value": 0.0, "page": 62, "quote": "India Bangalore, Sarjapur – 600 – – 1,000 1,600 38,100 0% 39,700", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "MY", "kind": "실적", "year": 2025, "value": 100.0, "page": 32, "quote": "In 2025, we achieved 100% renewable electricity for our U.S., Europe, Israel, Malaysia,", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "PL", "kind": "실적", "year": 2025, "value": 100.0, "page": 62, "quote": "Poland Gdansk – 1,000 – – 200 1,200 – 100% 1,200", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "US", "kind": "실적", "year": 2025, "value": 100.0, "page": 32, "quote": "In 2025, we achieved 100% renewable electricity for our U.S., Europe, Israel, Malaysia,", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "intel", "geo": "VN", "kind": "실적", "year": 2025, "value": 100.0, "page": 32, "quote": "Vietnam, and China locations, and 97% in Costa Rica, bringing the global total to 99%.", "report": "Intel_CSR_2025-26_Full_Report", "quality": "A_reported"}, {"co": "micron", "geo": "GLOBAL", "kind": "실적", "year": 2022, "value": 2.0, "page": 92, "quote": "Renewable electricity consumed % 2% 4% 9% 13%", "report": "Micron_2026_Sustainability_Report", "quality": "A_reported"}, {"co": "micron", "geo": "GLOBAL", "kind": "실적", "year": 2023, "value": 4.0, "page": 92, "quote": "Renewable electricity consumed % 2% 4% 9% 13%", "report": "Micron_2026_Sustainability_Report", "quality": "A_reported"}, {"co": "micron", "geo": "GLOBAL", "kind": "실적", "year": 2024, "value": 9.0, "page": 92, "quote": "Renewable electricity consumed % 2% 4% 9% 13%", "report": "Micron_2026_Sustainability_Report", "quality": "A_reported"}, {"co": "micron", "geo": "GLOBAL", "kind": "실적", "year": 2025, "value": 13.0, "page": 92, "quote": "Renewable electricity consumed % 2% 4% 9% 13%", "report": "Micron_2026_Sustainability_Report", "quality": "A_reported"}, {"co": "micron", "geo": "CN", "kind": "실적", "year": 2025, "value": 100.0, "page": 35, "quote": "100% renewable electricity in mainland China2", "report": "Micron_2026_Sustainability_Report", "quality": "A_reported"}, {"co": "micron", "geo": "MY", "kind": "실적", "year": 2025, "value": 100.0, "page": 35, "quote": "100% renewable electricity in Malaysia2", "report": "Micron_2026_Sustainability_Report", "quality": "A_reported"}, {"co": "micron", "geo": "US", "kind": "목표", "year": 2025, "value": 100.0, "page": 35, "quote": "100% renewable electricity in the U.S.", "report": "Micron_2026_Sustainability_Report", "note": "U.S. operations, end of CY25 (achieved). 장기 aspiration: 100% carbon-free electricity globally, where available (연도 미기재)"}, {"co": "micron", "geo": "US", "kind": "실적", "year": 2025, "value": 100.0, "page": 35, "quote": "100% renewable electricity in the U.S. as of the end of CY25", "report": "Micron_2026_Sustainability_Report", "quality": "A_reported"}, {"co": "skhynix", "geo": "GLOBAL", "kind": "목표", "year": 2026, "value": 31.0, "page": 25, "quote": "2026 31.0% -", "report": "SK_hynix_Sustainability_Report_2026", "note": "연도별 목표"}, {"co": "skhynix", "geo": "GLOBAL", "kind": "목표", "year": 2030, "value": 33.0, "page": 23, "quote": "재생에너지 사용률 33% 달성을 중간 목표로 수립했습니다.", "report": "SK_hynix_Sustainability_Report_2026", "note": "2030 중간 목표"}, {"co": "skhynix", "geo": "GLOBAL", "kind": "목표", "year": 2050, "value": 100.0, "page": 23, "quote": "SK하이닉스는 2050년까지 넷제로 및 RE100 달성을 장기 목표로 설정하고", "report": "SK_hynix_Sustainability_Report_2026", "note": "장기 목표(넷제로와 함께)"}, {"co": "skhynix", "geo": "GLOBAL", "kind": "실적", "year": 2022, "value": 29.6, "page": 103, "quote": "사용률 % 29.6 30.0 29.9 31.0", "report": "SK_hynix_Sustainability_Report_2026", "quality": "A_reported"}, {"co": "skhynix", "geo": "GLOBAL", "kind": "실적", "year": 2023, "value": 30.0, "page": 103, "quote": "사용률 % 29.6 30.0 29.9 31.0", "report": "SK_hynix_Sustainability_Report_2026", "quality": "A_reported"}, {"co": "skhynix", "geo": "GLOBAL", "kind": "실적", "year": 2024, "value": 29.9, "page": 103, "quote": "사용률 % 29.6 30.0 29.9 31.0", "report": "SK_hynix_Sustainability_Report_2026", "quality": "A_reported"}, {"co": "skhynix", "geo": "GLOBAL", "kind": "실적", "year": 2025, "value": 31.0, "page": 103, "quote": "사용률 % 29.6 30.0 29.9 31.0", "report": "SK_hynix_Sustainability_Report_2026", "quality": "A_reported"}, {"co": "skhynix", "geo": "CN", "kind": "실적", "year": 2025, "value": 100.0, "page": 25, "quote": "재생에너지 자원이 상대적으로 풍부한 해외 생산 사업장은 2022년 RE100", "report": "SK_hynix_Sustainability_Report_2026", "quality": "A_reported"}, {"co": "tsmc", "geo": "GLOBAL", "kind": "목표", "year": 2030, "value": 60.0, "page": 39, "quote": "60% of the electricity consumption at all company operational sites comes from", "report": "2025_TSMC_Climate_and_Nature_Report_e", "note": "RE60: all company operational sites. 목표연도 2030은 p.5 로드맵(RE60이 2030 위치) 기준 — 검토 시 본 보고서로 확인 필요"}, {"co": "tsmc", "geo": "GLOBAL", "kind": "목표", "year": 2040, "value": 100.0, "page": 15, "quote": "Commit to achieving RE100 by 2040", "report": "2025_TSMC_Climate_and_Nature_Report_e", "note": "RE100 by 2040"}, {"co": "tsmc", "geo": "GLOBAL", "kind": "실적", "year": 2025, "value": 20.1, "page": 28, "quote": "Renewable energy now accounts for 20.1% of the", "report": "2025_TSMC_Climate_and_Nature_Report_e", "quality": "A_reported"}, {"co": "tsmc", "geo": "OVERSEAS", "kind": "실적", "year": 2025, "value": 100.0, "page": 40, "quote": "Reached 100% renewable energy use at overseas subsidiaries; renewable", "report": "2025_TSMC_Climate_and_Nature_Report_e", "quality": "A_reported"}, {"co": "tsmc", "geo": "TW", "kind": "실적", "year": 2025, "value": 11.5, "page": 4, "quote": "energy use rose to 5.78 billion kWh, with renewable energy accounting for 11.5% of electricity", "report": "2025_TSMC_Climate_and_Nature_Report_e", "quality": "A_reported"}], "reports": {"micron": [{"title": "Micron_2026_Sustainability_Report", "note": "FY 기준(FY25=2024.9~2025.8, FY24부터 회계연도; CY22·CY23은 역년). 단위 MTCO2e=metric ton CO2e(p.93 각주2). FY25 RE 총량에는 고객에게 우선 배분된 683,641 MWh 포함, 미배분 RE는 총 전력공급의 5.9%(p.92 각주5). SASB 표의 'percentage renewable energy 10%'는 총에너지 기준(p.88), 전력 기준 RE 비율은 13%."}], "intel": [{"title": "Intel_CSR_2025-26_Full_Report", "note": "역년(CY) 기준. 국가별 RE%는 본문(p.32) 및 사업장별 인벤토리(p.62). Europe=Ireland·Poland(p.62). 조달 수단: 온·오프사이트 발전, 유틸리티 RE 구매, REC 등 green attributes(Green-e 인증 다수) — 수단별 물량 미공시(p.36)."}, {"title": "Intel_CSR_2025-26_Report_Data_File", "note": "Data File 표. 수치는 반올림값이며 본 보고서와 다를 수 있음(각주1). Dalian 제외(2022~)."}], "skhynix": [{"title": "SK_hynix_Sustainability_Report_2026", "note": "데이터 범위: 이천, 청주, 분당, 서울(거점오피스), 우시, 충칭(p.103). 총전력에 SEC 자가발전 포함. RE 조달수단: 녹색프리미엄, REC, PPA, 자가발전(p.118) — 수단별 물량 미공시. p.102 Scope 2 표는 location-based(각주1); market-based는 Scope1&2 합계만 공시(2025년 5,555,285 tCO2eq). CN 100%는 '해외 생산 사업장(우시·충칭) RE100 조기 달성 후 유지' 서술 기반(연도별 수치 미공시). 국내(KR) RE 비율은 별도 공시 없음. 2022~2024 데이터 일부 수정됨."}], "tsmc": [{"title": "2025_TSMC_Climate_and_Nature_Report_e", "note": "TSMC 2025 Climate and Nature Report만 사용(본 Sustainability Report 미확보). 총 전력사용량·Scope 2 수치는 이 보고서 추출 페이지에서 미확인. TW 값은 'Taiwan fabs and VisEra' 기준(p.28) / 'Taiwan operations'(p.4). OVERSEAS(해외 자회사)의 국가 구성은 원문 미기재. 2025년부터 해상풍력 도입(p.4). 조달 수단별 물량 미공시."}]}}, "contracts": [{"company_id": "micron", "country": "US", "instrument": "ppa_physical", "technology": "solar", "capacity_mw": 40.0, "annual_mwh": 77000.0, "start_year": null, "counterparty": "Idaho Power (Black Mesa, Idaho)", "page": 38}, {"company_id": "micron", "country": "US", "instrument": "ppa_virtual", "technology": "solar", "capacity_mw": 70.0, "annual_mwh": null, "start_year": 2025, "counterparty": "7V Solar Ranch (Texas)", "page": 38}, {"company_id": "micron", "country": "US", "instrument": "ppa_virtual", "technology": "solar", "capacity_mw": 168.0, "annual_mwh": null, "start_year": 2025, "counterparty": "Grimes County Solar (Texas)", "page": 38}, {"company_id": "micron", "country": "MY", "instrument": "green_tariff", "technology": null, "capacity_mw": null, "annual_mwh": null, "start_year": null, "counterparty": "Green Electricity Tariff program", "page": 38}, {"company_id": "skhynix", "country": "KR", "instrument": "ppa_physical", "technology": "hydro", "capacity_mw": null, "annual_mwh": null, "start_year": 2025, "counterparty": null, "page": 5}, {"company_id": "tsmc", "country": "TW", "instrument": null, "technology": "wind_offshore", "capacity_mw": null, "annual_mwh": null, "start_year": 2025, "counterparty": null, "page": 4}], "regional": [{"geography": "CN", "company_id": "intel", "year": 2025, "re_ratio_pct": 100.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 32}, {"geography": "CN", "company_id": "micron", "year": 2025, "re_ratio_pct": 100.0, "report": "Micron_2026_Sustainability_Report", "page": 35}, {"geography": "CN", "company_id": "skhynix", "year": 2025, "re_ratio_pct": 100.0, "report": "SK_hynix_Sustainability_Report_2026", "page": 25}, {"geography": "CR", "company_id": "intel", "year": 2025, "re_ratio_pct": 97.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 32}, {"geography": "IE", "company_id": "intel", "year": 2025, "re_ratio_pct": 100.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 62}, {"geography": "IL", "company_id": "intel", "year": 2025, "re_ratio_pct": 100.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 32}, {"geography": "IN", "company_id": "intel", "year": 2025, "re_ratio_pct": 0.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 62}, {"geography": "MY", "company_id": "intel", "year": 2025, "re_ratio_pct": 100.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 32}, {"geography": "MY", "company_id": "micron", "year": 2025, "re_ratio_pct": 100.0, "report": "Micron_2026_Sustainability_Report", "page": 35}, {"geography": "OVERSEAS", "company_id": "tsmc", "year": 2025, "re_ratio_pct": 100.0, "report": "2025_TSMC_Climate_and_Nature_Report_e", "page": 40}, {"geography": "PL", "company_id": "intel", "year": 2025, "re_ratio_pct": 100.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 62}, {"geography": "TW", "company_id": "tsmc", "year": 2025, "re_ratio_pct": 11.5, "report": "2025_TSMC_Climate_and_Nature_Report_e", "page": 4}, {"geography": "US", "company_id": "intel", "year": 2025, "re_ratio_pct": 100.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 32}, {"geography": "US", "company_id": "micron", "year": 2025, "re_ratio_pct": 100.0, "report": "Micron_2026_Sustainability_Report", "page": 35}, {"geography": "VN", "company_id": "intel", "year": 2025, "re_ratio_pct": 100.0, "report": "Intel_CSR_2025-26_Full_Report", "page": 32}], "dataStatus": "approved (bulk assumed, not reviewed)"};
+const BM = DATA.bm;
+const COS = ["tsmc", "skhynix", "intel", "micron"].filter(c => BM.companies[c] && BM.actual.GLOBAL?.[c]);
+const NAME = Object.fromEntries(Object.entries(BM.companies).map(([k, v]) => [k, v.replace(" Technology", "")]));
+const GEO_NAME = { KR: "한국", CN: "중국", US: "미국", TW: "대만", JP: "일본", SG: "싱가포르", MY: "말레이시아", IE: "아일랜드", IL: "이스라엘", VN: "베트남", IN: "인도", PL: "폴란드", CR: "코스타리카", OVERSEAS: "TSMC 해외 자회사" };
+const IND = [["industry_max", "업계 최고 수준"], ["industry_avg", "업계 평균 수준"], ["industry_min", "업계 최저 수준"]];
+const SCEN = [...IND.map(([id, label]) => ({ id, label, ind: true })), ...COS.map(c => ({ id: c, label: `${NAME[c]} 수준`, ind: false }))];
+const COLOR = id => id === "industry_avg" ? "var(--c-ind)" : id.startsWith("industry") ? "var(--muted)" : `var(--c-${id})`;
+const DASH = id => id === "industry_max" ? "6 4" : id === "industry_min" ? "2 4" : "";
+const fmt = (v, d = 1) => v == null || isNaN(v) ? "–" : v.toLocaleString("ko-KR", { maximumFractionDigits: d, minimumFractionDigits: d });
+const esc = s => String(s ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+const state = { from: 2025, to: 2040, kpi: 2030, cos: new Set(COS), show: new Set(SCEN.map(s => s.id)) };
+const years = () => Array.from({ length: state.to - state.from + 1 }, (_, i) => state.from + i);
+
+// ---------- 계산 (bm_path.py 와 동일 규칙) ----------
+function pathway(actual = {}, targets = {}, YS) {
+  const ay = Object.keys(actual).map(Number), res = {};
+  if (!ay.length) { YS.forEach(y => res[y] = null); return res; }
+  const lastY = Math.max(...ay);
+  const pts = [[lastY, actual[lastY]], ...Object.entries(targets).map(([y, v]) => [+y, v]).filter(([y]) => y > lastY).sort((a, b) => a[0] - b[0])];
+  for (const y of YS) {
+    if (actual[y] != null) { res[y] = actual[y]; continue; }
+    if (y < lastY) { res[y] = null; continue; }
+    let v = pts[pts.length - 1][1];
+    for (let i = 0; i < pts.length - 1; i++) { const [y0, v0] = pts[i], [y1, v1] = pts[i + 1]; if (y >= y0 && y <= y1) { v = v0 + (v1 - v0) * (y - y0) / (y1 - y0); break; } }
+    res[y] = v;
+  }
+  return res;
+}
+function compute() {
+  const YS = years(), paths = Object.fromEntries(COS.map(c => [c, pathway(BM.actual.GLOBAL[c], BM.targets.GLOBAL?.[c], YS)]));
+  return YS.map(y => {
+    const vals = Object.fromEntries([...state.cos].filter(c => paths[c][y] != null).map(c => [c, paths[c][y]]));
+    const xs = Object.values(vals), row = { year: y };
+    if (xs.length) {
+      const hi = Math.max(...xs), lo = Math.min(...xs);
+      Object.assign(row, { industry_max: hi, industry_max_by: Object.keys(vals).filter(c => vals[c] === hi).sort().join(","),
+        industry_avg: xs.reduce((a, b) => a + b, 0) / xs.length,
+        industry_min: lo, industry_min_by: Object.keys(vals).filter(c => vals[c] === lo).sort().join(","), n_companies: xs.length });
+    } else Object.assign(row, { industry_max: null, industry_max_by: "", industry_avg: null, industry_min: null, industry_min_by: "", n_companies: 0 });
+    for (const c of [...COS].sort()) row[c] = paths[c][y];
+    return row;
+  });
+}
+
+// ---------- 렌더 ----------
+function renderControls() {
+  const ys = Array.from({ length: 2050 - 2021 + 1 }, (_, i) => 2021 + i).map(y => `<option>${y}</option>`).join("");
+  for (const [id, v] of [["from", state.from], ["to", state.to]]) { const e = document.getElementById(id); e.innerHTML = ys; e.value = v; }
+  document.getElementById("scen").innerHTML = SCEN.map(s => `<label class="check" for="sc-${s.id}"><input type="checkbox" id="sc-${s.id}" value="${s.id}" checked><span class="swatch line" style="background:${COLOR(s.id)}"></span>${esc(s.label)}</label>`).join("");
+  document.getElementById("cos").innerHTML = COS.map(c => `<label class="check" for="co-${c}"><input type="checkbox" id="co-${c}" value="${c}" checked>${esc(NAME[c])}</label>`).join("");
+}
+function renderKpiYear() {
+  const k = document.getElementById("kpi-year"), YS = years();
+  if (!YS.includes(state.kpi)) state.kpi = YS.includes(2030) ? 2030 : YS.at(-1);
+  k.innerHTML = YS.map(y => `<option>${y}</option>`).join(""); k.value = state.kpi;
+}
+const byText = ids => ids ? ids.split(",").map(c => NAME[c]).join(" · ") : "";
+function renderBars(rows) {
+  const r = rows.find(r => r.year === state.kpi);
+  document.getElementById("bars-title").textContent = `${state.kpi}년 수준 비교`;
+  const items = SCEN.filter(s => state.show.has(s.id)).map(s => ({ ...s, v: r?.[s.id], by: r?.[`${s.id}_by`] })).filter(s => s.v != null).sort((a, b) => b.v - a.v);
+  document.getElementById("bars").innerHTML = items.map(s => `<div class="name${s.ind ? " ind" : ""}" style="display:contents"><span class="name"><span class="swatch line" style="background:${COLOR(s.id)}"></span>${esc(s.label)}${s.by ? `<small>${esc(byText(s.by))}</small>` : ""}</span><div class="track"><div class="fill" style="width:${Math.max(0, Math.min(100, s.v))}%;background:${COLOR(s.id)};opacity:${s.ind ? .55 : .85}"></div></div><span class="val">${fmt(s.v)}%</span></div>`).join("") || '<p class="hint">표시할 시나리오를 고르세요.</p>';
+}
+function renderChart(rows) {
+  const YS = years(), W = 760, H = 320, P = { l: 36, r: 132, t: 14, b: 26 };
+  const x = y => P.l + (YS.length > 1 ? (y - YS[0]) / (YS.at(-1) - YS[0]) : .5) * (W - P.l - P.r);
+  const yv = v => P.t + (1 - v / 100) * (H - P.t - P.b);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="시나리오별 RE 비율 경로">`;
+  for (const t of [0, 25, 50, 75, 100]) s += `<line class="grid-l" x1="${P.l}" x2="${W - P.r}" y1="${yv(t)}" y2="${yv(t)}"/><text x="${P.l - 6}" y="${yv(t) + 4}" text-anchor="end">${t}</text>`;
+  const step = YS.length > 16 ? 5 : YS.length > 8 ? 2 : 1;
+  for (const y of YS.filter(y => (y - YS[0]) % step === 0)) s += `<text x="${x(y)}" y="${H - 6}" text-anchor="middle">${y}</text>`;
+  const band = rows.filter(r => r.industry_max != null);
+  if (band.length && state.show.has("industry_max") && state.show.has("industry_min"))
+    s += `<polygon points="${[...band.map(r => `${x(r.year)},${yv(r.industry_max)}`), ...band.slice().reverse().map(r => `${x(r.year)},${yv(r.industry_min)}`)].join(" ")}" fill="var(--band)" opacity=".8"/>`;
+  const kx = x(state.kpi);
+  s += `<line x1="${kx}" x2="${kx}" y1="${P.t}" y2="${H - P.b}" stroke="var(--muted)" stroke-dasharray="2 3"/>`;
+  const labels = [];
+  for (const sc of SCEN) {
+    if (!state.show.has(sc.id)) continue;
+    const pts = rows.filter(r => r[sc.id] != null).map(r => [x(r.year), yv(r[sc.id]), r[sc.id]]);
+    if (!pts.length) continue;
+    const w = sc.id === "industry_avg" ? 3 : sc.ind ? 1.75 : 2;
+    s += `<polyline points="${pts.map(p => p[0] + "," + p[1]).join(" ")}" fill="none" stroke="${COLOR(sc.id)}" stroke-width="${w}" stroke-dasharray="${DASH(sc.id)}"/>`;
+    labels.push([pts.at(-1)[1], `${sc.label.replace(" 수준", "")} ${fmt(pts.at(-1)[2], 0)}%`, COLOR(sc.id)]);
+  }
+  labels.sort((a, b) => a[0] - b[0]);
+  for (let i = 1; i < labels.length; i++) if (labels[i][0] - labels[i - 1][0] < 13) labels[i][0] = labels[i - 1][0] + 13;
+  for (const [ly, t, col] of labels) s += `<text x="${W - P.r + 8}" y="${ly + 4}" style="fill:${col}">${esc(t)}</text>`;
+  document.getElementById("chart").innerHTML = s + "</svg>";
+  document.getElementById("legend").innerHTML = `<span><span class="swatch" style="background:var(--band)"></span>업계 최고~최저 범위</span><span>굵은 선 = 업계 평균, 긴 점선 = 최고, 짧은 점선 = 최저</span><span>세로 점선 = ${state.kpi}년</span>`;
+}
+function renderTable(rows) {
+  const cols = SCEN.filter(s => state.show.has(s.id));
+  document.getElementById("table").innerHTML = `<thead><tr><th class="l">연도</th>${cols.map(s => `<th class="${s.ind ? "ind" : ""}">${esc(s.label.replace(" 수준", ""))}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map(r => `<tr class="${r.year === state.kpi ? "sel" : ""}"><td class="num">${r.year}</td>${cols.map(s => `<td class="num${s.ind ? " ind" : ""}" title="${esc(byText(r[`${s.id}_by`]))}">${fmt(r[s.id])}${r[`${s.id}_by`] && s.id !== "industry_avg" ? `<br><span class="hint">${esc(byText(r[`${s.id}_by`]))}</span>` : ""}</td>`).join("")}</tr>`).join("") + "</tbody>";
+}
+const r2 = v => v == null ? null : Math.round(v * 100) / 100;
+function toCsv(rows) {
+  if (!rows.length) return "";
+  const keys = Object.keys(rows[0]);
+  return [keys.join(","), ...rows.map(r => keys.map(k => { const v = typeof r[k] === "number" && k !== "year" && k !== "n_companies" ? r2(r[k]) : r[k]; return v == null ? "" : String(v).includes(",") ? `"${v}"` : v; }).join(","))].join("\n");
+}
+function toPackage(rows) {
+  const used = [...state.cos].sort();
+  const scen = SCEN.filter(s => state.show.has(s.id)).map(s => ({ id: s.id, label: s.label,
+    path: rows.map(r => ({ year: r.year, re_ratio_pct: r2(r[s.id]), ...(r[`${s.id}_by`] !== undefined ? { set_by: r[`${s.id}_by`] } : {}) })) }));
+  return JSON.stringify({
+    package_id: "competitor_bm_levels", source: "REBM", generated_at: new Date().toISOString().slice(0, 10),
+    basis: "company-wide (GLOBAL) renewable electricity share, %", companies: used, years: [state.from, state.to], data_status: DATA.dataStatus,
+    rules: "approved A/B values only; each company: latest actual -> disclosed targets by linear interpolation, then held flat (no target: latest actual held); industry_max/avg/min computed per year across companies",
+    scenarios: scen,
+    regional_notes: { note: "Regional (country) disclosures are NOT applied to the scenarios; listed for reference only.", disclosures: DATA.regional.filter(d => used.includes(d.company_id)) },
+    evidence: { actuals: BM.evidence.filter(e => e.kind === "실적" && e.geo === "GLOBAL" && used.includes(e.co)), targets: BM.evidence.filter(e => e.kind === "목표" && e.geo === "GLOBAL" && used.includes(e.co)), reference_contracts: (DATA.contracts || []).filter(k => used.includes(k.company_id)) },
+  }, null, 1);
+}
+function renderFootnotes() {
+  const byGeo = {};
+  for (const d of DATA.regional) (byGeo[d.geography] ||= []).push(d);
+  const order = Object.keys(byGeo).sort((a, b) => (a === "OVERSEAS") - (b === "OVERSEAS") || a.localeCompare(b));
+  document.getElementById("regional").innerHTML = `<thead><tr><th class="l">국가·권역</th><th class="l">공시 회사와 RE 비율</th></tr></thead><tbody>` +
+    `<tr><td class="l">한국 (KR)</td><td class="l">국가별 공시 없음 (SK hynix 31%는 한국+중국 전사 값)</td></tr>` +
+    order.map(g => `<tr><td class="l">${esc(GEO_NAME[g] || g)}${g !== "OVERSEAS" ? ` (${g})` : ""}</td><td class="l">${byGeo[g].map(d => `${esc(NAME[d.company_id])} ${fmt(d.re_ratio_pct, d.re_ratio_pct % 1 ? 1 : 0)}% <span class="hint">(${d.year}, ${esc(d.report)} p.${d.page})</span>`).join(" · ")}</td></tr>`).join("") + "</tbody>";
+  document.getElementById("evidence").innerHTML = `<thead><tr><th class="l">회사</th><th class="l">구분</th><th>연도</th><th>RE %</th><th class="l">근거</th><th class="l">원문 인용</th></tr></thead><tbody>` +
+    BM.evidence.filter(e => e.geo === "GLOBAL").map(e => `<tr><td class="l">${esc(NAME[e.co])}</td><td class="l">${e.kind}${e.quality === "B_derived" ? " (산출)" : ""}</td><td class="num">${e.year}</td><td class="num">${fmt(e.value)}</td><td class="l">${esc(e.report)} p.${e.page ?? "–"}</td><td class="q">${esc(e.quote)}${e.note ? `<br>※ ${esc(e.note)}` : ""}</td></tr>`).join("") + "</tbody>";
+}
+
+let last = [];
+function update() {
+  if (state.from > state.to) [state.from, state.to] = [state.to, state.from];
+  renderKpiYear(); last = compute();
+  renderBars(last); renderChart(last); renderTable(last);
+  document.getElementById("preview").textContent = toCsv(last).split("\n").slice(0, 6).join("\n") + "\n…";
+}
+async function copy(text, label) {
+  const st = document.getElementById("copy-status"), pv = document.getElementById("preview");
+  try { await navigator.clipboard.writeText(text); st.textContent = `${label}을(를) 복사했습니다.`; pv.textContent = text.slice(0, 4000) + (text.length > 4000 ? "\n…" : ""); }
+  catch { st.textContent = "복사가 막혀 있습니다. 아래 미리보기에서 선택해 복사하세요."; pv.textContent = text; }
+}
+
+renderControls(); renderFootnotes(); update();
+document.getElementById("kpi-year").addEventListener("change", e => { state.kpi = +e.target.value; update(); });
+document.getElementById("from").addEventListener("change", e => { state.from = +e.target.value; update(); });
+document.getElementById("to").addEventListener("change", e => { state.to = +e.target.value; update(); });
+document.getElementById("scen").addEventListener("change", e => { e.target.checked ? state.show.add(e.target.value) : state.show.delete(e.target.value); update(); });
+document.getElementById("cos").addEventListener("change", e => { e.target.checked ? state.cos.add(e.target.value) : state.cos.delete(e.target.value); update(); });
+document.getElementById("copy-csv").addEventListener("click", () => copy(toCsv(last), "CSV"));
+document.getElementById("copy-json").addEventListener("click", () => copy(toPackage(last), "JSON 시나리오 패키지"));
+</script>

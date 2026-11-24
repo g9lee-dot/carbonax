@@ -1,0 +1,941 @@
+{
+ "package_id": "competitor_bm_levels",
+ "source": "REBM",
+ "generated_at": "2026-11-24",
+ "basis": "company-wide (GLOBAL) renewable electricity share, %",
+ "companies": [
+  "intel",
+  "micron",
+  "skhynix",
+  "tsmc"
+ ],
+ "years": [
+  2025,
+  2040
+ ],
+ "data_status": "approved (bulk assumed, not reviewed)",
+ "rules": "approved A/B values only; each company: latest actual -> disclosed targets by linear interpolation, then held flat (no target: latest actual held); industry_max/avg/min computed per year across companies",
+ "scenarios": [
+  {
+   "id": "industry_max",
+   "label": "업계 최고 수준",
+   "path": [
+    {
+     "year": 2025,
+     "re_ratio_pct": 99.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2026,
+     "re_ratio_pct": 99.2,
+     "set_by": "intel"
+    },
+    {
+     "year": 2027,
+     "re_ratio_pct": 99.4,
+     "set_by": "intel"
+    },
+    {
+     "year": 2028,
+     "re_ratio_pct": 99.6,
+     "set_by": "intel"
+    },
+    {
+     "year": 2029,
+     "re_ratio_pct": 99.8,
+     "set_by": "intel"
+    },
+    {
+     "year": 2030,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2031,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2032,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2033,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2034,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2035,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2036,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2037,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2038,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2039,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel"
+    },
+    {
+     "year": 2040,
+     "re_ratio_pct": 100.0,
+     "set_by": "intel,tsmc"
+    }
+   ]
+  },
+  {
+   "id": "industry_avg",
+   "label": "업계 평균 수준",
+   "path": [
+    {
+     "year": 2025,
+     "re_ratio_pct": 40.77
+    },
+    {
+     "year": 2026,
+     "re_ratio_pct": 42.82
+    },
+    {
+     "year": 2027,
+     "re_ratio_pct": 44.99
+    },
+    {
+     "year": 2028,
+     "re_ratio_pct": 47.16
+    },
+    {
+     "year": 2029,
+     "re_ratio_pct": 49.33
+    },
+    {
+     "year": 2030,
+     "re_ratio_pct": 51.5
+    },
+    {
+     "year": 2031,
+     "re_ratio_pct": 53.34
+    },
+    {
+     "year": 2032,
+     "re_ratio_pct": 55.17
+    },
+    {
+     "year": 2033,
+     "re_ratio_pct": 57.01
+    },
+    {
+     "year": 2034,
+     "re_ratio_pct": 58.85
+    },
+    {
+     "year": 2035,
+     "re_ratio_pct": 60.69
+    },
+    {
+     "year": 2036,
+     "re_ratio_pct": 62.52
+    },
+    {
+     "year": 2037,
+     "re_ratio_pct": 64.36
+    },
+    {
+     "year": 2038,
+     "re_ratio_pct": 66.2
+    },
+    {
+     "year": 2039,
+     "re_ratio_pct": 68.04
+    },
+    {
+     "year": 2040,
+     "re_ratio_pct": 69.88
+    }
+   ]
+  },
+  {
+   "id": "industry_min",
+   "label": "업계 최저 수준",
+   "path": [
+    {
+     "year": 2025,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2026,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2027,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2028,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2029,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2030,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2031,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2032,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2033,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2034,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2035,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2036,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2037,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2038,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2039,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    },
+    {
+     "year": 2040,
+     "re_ratio_pct": 13.0,
+     "set_by": "micron"
+    }
+   ]
+  },
+  {
+   "id": "intel",
+   "label": "Intel 수준",
+   "path": [
+    {
+     "year": 2025,
+     "re_ratio_pct": 99.0
+    },
+    {
+     "year": 2026,
+     "re_ratio_pct": 99.2
+    },
+    {
+     "year": 2027,
+     "re_ratio_pct": 99.4
+    },
+    {
+     "year": 2028,
+     "re_ratio_pct": 99.6
+    },
+    {
+     "year": 2029,
+     "re_ratio_pct": 99.8
+    },
+    {
+     "year": 2030,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2031,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2032,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2033,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2034,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2035,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2036,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2037,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2038,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2039,
+     "re_ratio_pct": 100.0
+    },
+    {
+     "year": 2040,
+     "re_ratio_pct": 100.0
+    }
+   ]
+  },
+  {
+   "id": "micron",
+   "label": "Micron Technology 수준",
+   "path": [
+    {
+     "year": 2025,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2026,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2027,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2028,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2029,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2030,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2031,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2032,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2033,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2034,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2035,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2036,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2037,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2038,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2039,
+     "re_ratio_pct": 13.0
+    },
+    {
+     "year": 2040,
+     "re_ratio_pct": 13.0
+    }
+   ]
+  },
+  {
+   "id": "skhynix",
+   "label": "SK hynix 수준",
+   "path": [
+    {
+     "year": 2025,
+     "re_ratio_pct": 31.0
+    },
+    {
+     "year": 2026,
+     "re_ratio_pct": 31.0
+    },
+    {
+     "year": 2027,
+     "re_ratio_pct": 31.5
+    },
+    {
+     "year": 2028,
+     "re_ratio_pct": 32.0
+    },
+    {
+     "year": 2029,
+     "re_ratio_pct": 32.5
+    },
+    {
+     "year": 2030,
+     "re_ratio_pct": 33.0
+    },
+    {
+     "year": 2031,
+     "re_ratio_pct": 36.35
+    },
+    {
+     "year": 2032,
+     "re_ratio_pct": 39.7
+    },
+    {
+     "year": 2033,
+     "re_ratio_pct": 43.05
+    },
+    {
+     "year": 2034,
+     "re_ratio_pct": 46.4
+    },
+    {
+     "year": 2035,
+     "re_ratio_pct": 49.75
+    },
+    {
+     "year": 2036,
+     "re_ratio_pct": 53.1
+    },
+    {
+     "year": 2037,
+     "re_ratio_pct": 56.45
+    },
+    {
+     "year": 2038,
+     "re_ratio_pct": 59.8
+    },
+    {
+     "year": 2039,
+     "re_ratio_pct": 63.15
+    },
+    {
+     "year": 2040,
+     "re_ratio_pct": 66.5
+    }
+   ]
+  },
+  {
+   "id": "tsmc",
+   "label": "TSMC 수준",
+   "path": [
+    {
+     "year": 2025,
+     "re_ratio_pct": 20.1
+    },
+    {
+     "year": 2026,
+     "re_ratio_pct": 28.08
+    },
+    {
+     "year": 2027,
+     "re_ratio_pct": 36.06
+    },
+    {
+     "year": 2028,
+     "re_ratio_pct": 44.04
+    },
+    {
+     "year": 2029,
+     "re_ratio_pct": 52.02
+    },
+    {
+     "year": 2030,
+     "re_ratio_pct": 60.0
+    },
+    {
+     "year": 2031,
+     "re_ratio_pct": 64.0
+    },
+    {
+     "year": 2032,
+     "re_ratio_pct": 68.0
+    },
+    {
+     "year": 2033,
+     "re_ratio_pct": 72.0
+    },
+    {
+     "year": 2034,
+     "re_ratio_pct": 76.0
+    },
+    {
+     "year": 2035,
+     "re_ratio_pct": 80.0
+    },
+    {
+     "year": 2036,
+     "re_ratio_pct": 84.0
+    },
+    {
+     "year": 2037,
+     "re_ratio_pct": 88.0
+    },
+    {
+     "year": 2038,
+     "re_ratio_pct": 92.0
+    },
+    {
+     "year": 2039,
+     "re_ratio_pct": 96.0
+    },
+    {
+     "year": 2040,
+     "re_ratio_pct": 100.0
+    }
+   ]
+  }
+ ],
+ "regional_notes": {
+  "note": "Regional (country) disclosures are NOT applied to the scenarios; listed for reference only.",
+  "disclosures": [
+   {
+    "geography": "CN",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 32
+   },
+   {
+    "geography": "CN",
+    "company_id": "micron",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Micron_2026_Sustainability_Report",
+    "page": 35
+   },
+   {
+    "geography": "CN",
+    "company_id": "skhynix",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "SK_hynix_Sustainability_Report_2026",
+    "page": 25
+   },
+   {
+    "geography": "CR",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 97.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 32
+   },
+   {
+    "geography": "IE",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 62
+   },
+   {
+    "geography": "IL",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 32
+   },
+   {
+    "geography": "IN",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 0.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 62
+   },
+   {
+    "geography": "MY",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 32
+   },
+   {
+    "geography": "MY",
+    "company_id": "micron",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Micron_2026_Sustainability_Report",
+    "page": 35
+   },
+   {
+    "geography": "OVERSEAS",
+    "company_id": "tsmc",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "2025_TSMC_Climate_and_Nature_Report_e",
+    "page": 40
+   },
+   {
+    "geography": "PL",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 62
+   },
+   {
+    "geography": "TW",
+    "company_id": "tsmc",
+    "year": 2025,
+    "re_ratio_pct": 11.5,
+    "report": "2025_TSMC_Climate_and_Nature_Report_e",
+    "page": 4
+   },
+   {
+    "geography": "US",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 32
+   },
+   {
+    "geography": "US",
+    "company_id": "micron",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Micron_2026_Sustainability_Report",
+    "page": 35
+   },
+   {
+    "geography": "VN",
+    "company_id": "intel",
+    "year": 2025,
+    "re_ratio_pct": 100.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 32
+   }
+  ]
+ },
+ "evidence": {
+  "actuals": [
+   {
+    "metric_id": 24,
+    "company_id": "intel",
+    "data_year": 2021,
+    "re_ratio_pct": 80.0,
+    "data_quality": "A_reported",
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 58,
+    "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+   },
+   {
+    "metric_id": 23,
+    "company_id": "intel",
+    "data_year": 2022,
+    "re_ratio_pct": 93.0,
+    "data_quality": "A_reported",
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 58,
+    "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+   },
+   {
+    "metric_id": 22,
+    "company_id": "intel",
+    "data_year": 2023,
+    "re_ratio_pct": 99.0,
+    "data_quality": "A_reported",
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 58,
+    "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+   },
+   {
+    "metric_id": 21,
+    "company_id": "intel",
+    "data_year": 2024,
+    "re_ratio_pct": 98.0,
+    "data_quality": "A_reported",
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 58,
+    "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+   },
+   {
+    "metric_id": 20,
+    "company_id": "intel",
+    "data_year": 2025,
+    "re_ratio_pct": 99.0,
+    "data_quality": "A_reported",
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 58,
+    "quote": "Renewable electricity (% of global electricity use) 99% 98% 99% 93% 80%"
+   },
+   {
+    "metric_id": 9,
+    "company_id": "micron",
+    "data_year": 2022,
+    "re_ratio_pct": 2.0,
+    "data_quality": "A_reported",
+    "report": "Micron_2026_Sustainability_Report",
+    "page": 92,
+    "quote": "Renewable electricity consumed % 2% 4% 9% 13%"
+   },
+   {
+    "metric_id": 10,
+    "company_id": "micron",
+    "data_year": 2023,
+    "re_ratio_pct": 4.0,
+    "data_quality": "A_reported",
+    "report": "Micron_2026_Sustainability_Report",
+    "page": 92,
+    "quote": "Renewable electricity consumed % 2% 4% 9% 13%"
+   },
+   {
+    "metric_id": 11,
+    "company_id": "micron",
+    "data_year": 2024,
+    "re_ratio_pct": 9.0,
+    "data_quality": "A_reported",
+    "report": "Micron_2026_Sustainability_Report",
+    "page": 92,
+    "quote": "Renewable electricity consumed % 2% 4% 9% 13%"
+   },
+   {
+    "metric_id": 12,
+    "company_id": "micron",
+    "data_year": 2025,
+    "re_ratio_pct": 13.0,
+    "data_quality": "A_reported",
+    "report": "Micron_2026_Sustainability_Report",
+    "page": 92,
+    "quote": "Renewable electricity consumed % 2% 4% 9% 13%"
+   },
+   {
+    "metric_id": 53,
+    "company_id": "skhynix",
+    "data_year": 2022,
+    "re_ratio_pct": 29.6,
+    "data_quality": "A_reported",
+    "report": "SK_hynix_Sustainability_Report_2026",
+    "page": 103,
+    "quote": "사용률 % 29.6 30.0 29.9 31.0"
+   },
+   {
+    "metric_id": 54,
+    "company_id": "skhynix",
+    "data_year": 2023,
+    "re_ratio_pct": 30.0,
+    "data_quality": "A_reported",
+    "report": "SK_hynix_Sustainability_Report_2026",
+    "page": 103,
+    "quote": "사용률 % 29.6 30.0 29.9 31.0"
+   },
+   {
+    "metric_id": 55,
+    "company_id": "skhynix",
+    "data_year": 2024,
+    "re_ratio_pct": 29.9,
+    "data_quality": "A_reported",
+    "report": "SK_hynix_Sustainability_Report_2026",
+    "page": 103,
+    "quote": "사용률 % 29.6 30.0 29.9 31.0"
+   },
+   {
+    "metric_id": 56,
+    "company_id": "skhynix",
+    "data_year": 2025,
+    "re_ratio_pct": 31.0,
+    "data_quality": "A_reported",
+    "report": "SK_hynix_Sustainability_Report_2026",
+    "page": 103,
+    "quote": "사용률 % 29.6 30.0 29.9 31.0"
+   },
+   {
+    "metric_id": 62,
+    "company_id": "tsmc",
+    "data_year": 2025,
+    "re_ratio_pct": 20.1,
+    "data_quality": "A_reported",
+    "report": "2025_TSMC_Climate_and_Nature_Report_e",
+    "page": 28,
+    "quote": "Renewable energy now accounts for 20.1% of the"
+   }
+  ],
+  "targets": [
+   {
+    "target_id": 2,
+    "company_id": "intel",
+    "target_year": 2030,
+    "re_ratio_pct": 100.0,
+    "report": "Intel_CSR_2025-26_Full_Report",
+    "page": 36,
+    "quote": "Our 2030 goal is to achieve 100% renewable electricity across our global",
+    "scope_note": "100% renewable electricity across global operations"
+   },
+   {
+    "target_id": 4,
+    "company_id": "skhynix",
+    "target_year": 2026,
+    "re_ratio_pct": 31.0,
+    "report": "SK_hynix_Sustainability_Report_2026",
+    "page": 25,
+    "quote": "2026 31.0% -",
+    "scope_note": "연도별 목표"
+   },
+   {
+    "target_id": 3,
+    "company_id": "skhynix",
+    "target_year": 2030,
+    "re_ratio_pct": 33.0,
+    "report": "SK_hynix_Sustainability_Report_2026",
+    "page": 23,
+    "quote": "재생에너지 사용률 33% 달성을 중간 목표로 수립했습니다.",
+    "scope_note": "2030 중간 목표"
+   },
+   {
+    "target_id": 5,
+    "company_id": "skhynix",
+    "target_year": 2050,
+    "re_ratio_pct": 100.0,
+    "report": "SK_hynix_Sustainability_Report_2026",
+    "page": 23,
+    "quote": "SK하이닉스는 2050년까지 넷제로 및 RE100 달성을 장기 목표로 설정하고",
+    "scope_note": "장기 목표(넷제로와 함께)"
+   },
+   {
+    "target_id": 6,
+    "company_id": "tsmc",
+    "target_year": 2030,
+    "re_ratio_pct": 60.0,
+    "report": "2025_TSMC_Climate_and_Nature_Report_e",
+    "page": 39,
+    "quote": "60% of the electricity consumption at all company operational sites comes from",
+    "scope_note": "RE60: all company operational sites. 목표연도 2030은 p.5 로드맵(RE60이 2030 위치) 기준 — 검토 시 본 보고서로 확인 필요"
+   },
+   {
+    "target_id": 7,
+    "company_id": "tsmc",
+    "target_year": 2040,
+    "re_ratio_pct": 100.0,
+    "report": "2025_TSMC_Climate_and_Nature_Report_e",
+    "page": 15,
+    "quote": "Commit to achieving RE100 by 2040",
+    "scope_note": "RE100 by 2040"
+   }
+  ],
+  "reference_contracts": [
+   {
+    "company_id": "micron",
+    "country": "US",
+    "instrument": "ppa_physical",
+    "technology": "solar",
+    "capacity_mw": 40.0,
+    "annual_mwh": 77000.0,
+    "start_year": null,
+    "counterparty": "Idaho Power (Black Mesa, Idaho)",
+    "page": 38
+   },
+   {
+    "company_id": "micron",
+    "country": "US",
+    "instrument": "ppa_virtual",
+    "technology": "solar",
+    "capacity_mw": 70.0,
+    "annual_mwh": null,
+    "start_year": 2025,
+    "counterparty": "7V Solar Ranch (Texas)",
+    "page": 38
+   },
+   {
+    "company_id": "micron",
+    "country": "US",
+    "instrument": "ppa_virtual",
+    "technology": "solar",
+    "capacity_mw": 168.0,
+    "annual_mwh": null,
+    "start_year": 2025,
+    "counterparty": "Grimes County Solar (Texas)",
+    "page": 38
+   },
+   {
+    "company_id": "micron",
+    "country": "MY",
+    "instrument": "green_tariff",
+    "technology": null,
+    "capacity_mw": null,
+    "annual_mwh": null,
+    "start_year": null,
+    "counterparty": "Green Electricity Tariff program",
+    "page": 38
+   },
+   {
+    "company_id": "skhynix",
+    "country": "KR",
+    "instrument": "ppa_physical",
+    "technology": "hydro",
+    "capacity_mw": null,
+    "annual_mwh": null,
+    "start_year": 2025,
+    "counterparty": null,
+    "page": 5
+   },
+   {
+    "company_id": "tsmc",
+    "country": "TW",
+    "instrument": null,
+    "technology": "wind_offshore",
+    "capacity_mw": null,
+    "annual_mwh": null,
+    "start_year": 2025,
+    "counterparty": null,
+    "page": 4
+   }
+  ]
+ }
+}

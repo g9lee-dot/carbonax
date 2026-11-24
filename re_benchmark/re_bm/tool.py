@@ -82,13 +82,10 @@ def build(conn, out: Path) -> Path:
 
 
 def build_path_tool(conn, out: Path) -> Path:
-    """경쟁사 정보만으로 BM 경로를 만드는 툴 (수요·배출계수 없음)."""
-    from .bm_path import evidence
-    assumed = conn.execute("SELECT COUNT(*) FROM re_metrics WHERE reviewer='bulk_assumed'").fetchone()[0]
-    pending = conn.execute("SELECT COUNT(*) FROM re_metrics WHERE review_status='pending'").fetchone()[0]
-    status = ("approved (bulk assumed, not reviewed)" if assumed
-              else "approved" if not pending else f"approved, {pending} pending excluded")
-    payload = {"bm": bm_data(conn), "contracts": evidence(conn, None)["reference_contracts"], "dataStatus": status}
+    """경쟁사 수준 비교 툴: 업계 최고/평균/최저 + 회사별 수준 (수요·배출계수 없음, 지역은 각주)."""
+    from .bm_path import data_status, evidence, regional_notes
+    payload = {"bm": bm_data(conn), "contracts": evidence(conn, None)["reference_contracts"],
+               "regional": regional_notes(conn), "dataStatus": data_status(conn)}
     html = PATH_TEMPLATE.read_text(encoding="utf-8").replace(
         "/*__DATA__*/null", json.dumps(payload, ensure_ascii=False).replace("</", "<\\/"))
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -104,7 +101,7 @@ def main():
     print("written:", write_dummy_csv(db.ROOT / "data" / "our_demand_dummy.csv"))
     conn = db.connect(a.db)
     print("written:", build(conn, a.out))
-    print("written:", build_path_tool(conn, a.out.with_name("bm_path_tool.html")))
+    print("written:", build_path_tool(conn, a.out.with_name("bm_levels_tool.html")))
 
 
 if __name__ == "__main__":

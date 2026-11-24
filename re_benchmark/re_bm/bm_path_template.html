@@ -1,34 +1,35 @@
-<title>경쟁사 BM 경로 생성기</title>
+<title>경쟁사 RE 수준 비교</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: 좌측 조건 패널 + 우측 결과(지역별 경로 차트 → 연도×지역 표 → 내보내기 → 근거). 좁은 화면은 한 열. */
+/* Layout: 좌측 조건 + 우측(기준연도 수준 비교 막대 → 경로 차트 → 연도별 표 → 내보내기 → 각주). 좁은 화면은 한 열. */
 :root {
-  --bg: #f5f7f6; --panel: #ffffff; --fg: #14201c; --muted: #5b6b65; --line: #dde4e1;
+  --bg: #f5f7f6; --panel: #ffffff; --fg: #14201c; --muted: #5b6b65; --line: #dde4e1; --band: #e6ece9;
   --accent: #0f6b55; --accent-soft: #e2f0eb; --warn: #a15c00; --warn-soft: #fbefdc;
-  --c-tsmc: #c2410c; --c-skhynix: #b91c4a; --c-intel: #1d5fb8; --c-micron: #6b4fb0; --c-bm: #14201c;
+  --c-tsmc: #c2410c; --c-skhynix: #b91c4a; --c-intel: #1d5fb8; --c-micron: #6b4fb0; --c-ind: #14201c;
   --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0e1513; --panel: #16201d; --fg: #e4ece9; --muted: #92a39d; --line: #2a3733;
+  --bg: #0e1513; --panel: #16201d; --fg: #e4ece9; --muted: #92a39d; --line: #2a3733; --band: #1f2b27;
   --accent: #4cc6a2; --accent-soft: #173a30; --warn: #f0b45e; --warn-soft: #3a2c16;
-  --c-tsmc: #fb8a4c; --c-skhynix: #f2668f; --c-intel: #6ea8f5; --c-micron: #b39af0; --c-bm: #e4ece9; color-scheme: dark } }
+  --c-tsmc: #fb8a4c; --c-skhynix: #f2668f; --c-intel: #6ea8f5; --c-micron: #b39af0; --c-ind: #e4ece9; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #0e1513; --panel: #16201d; --fg: #e4ece9; --muted: #92a39d; --line: #2a3733;
+  --bg: #0e1513; --panel: #16201d; --fg: #e4ece9; --muted: #92a39d; --line: #2a3733; --band: #1f2b27;
   --accent: #4cc6a2; --accent-soft: #173a30; --warn: #f0b45e; --warn-soft: #3a2c16;
-  --c-tsmc: #fb8a4c; --c-skhynix: #f2668f; --c-intel: #6ea8f5; --c-micron: #b39af0; --c-bm: #e4ece9; color-scheme: dark }
+  --c-tsmc: #fb8a4c; --c-skhynix: #f2668f; --c-intel: #6ea8f5; --c-micron: #b39af0; --c-ind: #e4ece9; color-scheme: dark }
 body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; line-height: 1.55; }
 .wrap { max-width: 1240px; margin: 0 auto; padding-block: 24px 48px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin-bottom: 20px; }
 h1 { font-size: 22px; font-weight: 700; margin: 0; text-wrap: balance; }
 h2 { font-size: 15px; font-weight: 600; margin: 0; }
-.sub { color: var(--muted); margin: 4px 0 0; max-width: 72ch; flex: 1 0 100%; }
+h3 { font-size: 13px; font-weight: 600; margin: 16px 0 8px; }
+.sub { color: var(--muted); margin: -12px 0 20px; max-width: 72ch; }
 .pill { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 .pill.warn { background: var(--warn-soft); color: var(--warn); }
 .pill.ok { background: var(--accent-soft); color: var(--accent); }
-.grid { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 20px; align-items: start; }
+.grid { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
 .stack { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
@@ -36,24 +37,22 @@ aside.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px);
 @media (max-width: 860px) { aside.panel { position: static; } }
 fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 legend { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .04em; margin-bottom: 6px; padding: 0; }
-.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.seg label { text-align: center; padding: 7px 4px; cursor: pointer; font-size: 13px; border-left: 1px solid var(--line); }
-.seg label:first-child { border-left: 0; }
-.seg input { position: absolute; opacity: 0; pointer-events: none; }
-.seg label:has(input:checked) { background: var(--accent); color: var(--panel); font-weight: 600; }
-.seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
 .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; }
 .swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.swatch.line { height: 3px; border-radius: 0; }
 .range { display: flex; align-items: center; gap: 8px; }
 select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; min-width: 0; }
 .range select { flex: 1; }
 select:focus-visible, input:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .hint { font-size: 12px; color: var(--muted); margin: 0; }
-.row-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
-.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-.tabs button { background: transparent; color: var(--muted); border: 1px solid var(--line); }
-.tabs button[aria-pressed="true"] { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+.row-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+.bars { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: 8px 12px; align-items: center; }
+.bars .name { font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.bars .name small { color: var(--muted); font-size: 11.5px; }
+.bars .track { height: 18px; background: var(--band); border-radius: 4px; overflow: hidden; }
+.bars .fill { height: 100%; border-radius: 4px; }
+.bars .val { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; min-width: 5ch; }
+.bars .ind .name { font-weight: 600; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); margin-top: 6px; }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -65,73 +64,80 @@ th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: rig
 th { font-size: 12px; color: var(--muted); font-weight: 600; }
 th:first-child, td:first-child, td.l, th.l { text-align: left; }
 td.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
-td.fb { color: var(--warn); }
+tr.sel td { background: var(--accent-soft); }
+th.ind, td.ind { font-weight: 600; }
+td.by { color: var(--muted); font-size: 11.5px; text-align: left; }
 button { font: inherit; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
 .btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .status { font-size: 12px; color: var(--muted); }
-pre.preview { margin: 10px 0 0; max-height: 220px; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-family: var(--font-num); font-size: 11.5px; white-space: pre; }
+pre.preview { margin: 10px 0 0; max-height: 200px; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-family: var(--font-num); font-size: 11.5px; white-space: pre; }
+.foot { font-size: 13px; color: var(--muted); }
+.foot ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.foot b { color: var(--fg); }
 details summary { cursor: pointer; font-weight: 600; }
-.ev td { white-space: normal; vertical-align: top; }
+.ev td, #regional td { white-space: normal; vertical-align: top; }
 .ev td.q { color: var(--muted); font-size: 12px; min-width: 240px; }
-.notes { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
 </style>
 
 <div class="wrap">
   <header>
-    <h1>경쟁사 BM 경로 생성기</h1>
-    <span class="pill ok">입력: 경쟁사 공시값만</span>
-    <span class="pill warn">데이터 상태: 일괄 승인 가정 (검토 전)</span>
-    <p class="sub">TSMC · SK hynix · Intel · Micron의 RE 전력 비율 실적과 공시 목표로 연도·지역별 벤치마크 RE 비율 경로를 만듭니다. 우리 회사 수요나 배출계수는 쓰지 않으며, 결과를 CSV나 JSON 시나리오 패키지로 복사해 RE 시뮬레이터 같은 다른 도구에 넣을 수 있습니다.</p>
+    <h1>경쟁사 RE 수준 비교</h1>
+    <span class="pill ok">입력: 경쟁사 공시값만 · 전사 RE 전력 비율</span>
+    <span class="pill warn">데이터: 일괄 승인 가정 (검토 전)</span>
   </header>
+  <p class="sub">업계 최고 · 평균 · 최저 수준과 TSMC · SK hynix · Intel · Micron 각 사 수준을 연도별 RE 전력 비율 경로로 나란히 비교합니다. 각 경로는 공시 실적에서 공시 목표까지 이은 것이며, 우리 회사 수요는 쓰지 않습니다. 지역별 정보는 각주에 정리했습니다.</p>
 
   <div class="grid">
-    <aside class="panel" aria-label="경로 조건">
+    <aside class="panel" aria-label="비교 조건">
       <fieldset>
-        <legend>지역 경로</legend>
-        <div class="seg" role="radiogroup">
-          <label><input type="radio" name="mode" id="mode-country" value="country" checked>국가별</label>
-          <label><input type="radio" name="mode" id="mode-global" value="global">전사로 통일</label>
-        </div>
-        <p class="hint" id="mode-hint"></p>
+        <legend>기준 연도</legend>
+        <select id="kpi-year" aria-label="기준 연도"></select>
       </fieldset>
-      <fieldset>
-        <legend>경쟁사 집계</legend>
-        <select id="method" aria-label="집계 방법"></select>
-      </fieldset>
-      <fieldset><legend>포함할 경쟁사</legend><div class="checks" id="cos"></div></fieldset>
-      <fieldset><legend>지역</legend><div class="checks" id="geos"></div></fieldset>
       <fieldset>
         <legend>연도 범위</legend>
         <div class="range"><select id="from" aria-label="시작 연도"></select><span>~</span><select id="to" aria-label="끝 연도"></select></div>
       </fieldset>
-      <p class="hint">경로: 최근 공시 실적에서 공시 목표연도까지 직선으로 잇고, 마지막 목표 이후는 그 값을 유지합니다. 목표가 없으면 최근 실적을 유지합니다.</p>
+      <fieldset><legend>표시할 시나리오</legend><div id="scen"></div></fieldset>
+      <fieldset><legend>업계 수준 계산에 포함할 회사</legend><div id="cos"></div></fieldset>
+      <p class="hint">업계 최고 · 평균 · 최저는 연도마다 포함한 회사 경로 중 최고값, 평균, 최저값입니다. 목표를 공시하지 않은 회사는 최근 실적이 유지됩니다(각주 2).</p>
     </aside>
 
     <div class="stack">
       <section class="panel">
-        <div class="row-head"><h2 id="chart-title">경로</h2><div class="tabs" id="geo-tabs" role="group" aria-label="차트 지역"></div></div>
+        <div class="row-head"><h2 id="bars-title">수준 비교</h2><span class="status">전사 RE 전력 비율</span></div>
+        <div class="bars" id="bars"></div>
+      </section>
+
+      <section class="panel">
+        <div class="row-head"><h2>연도별 경로 (%)</h2></div>
         <div id="chart"></div>
         <div class="legend" id="legend"></div>
       </section>
 
       <section class="panel">
-        <div class="row-head"><h2>연도 × 지역 벤치마크 RE 비율 (%)</h2><span class="status">주황 = 국가 공시가 없어 전사 값으로 대체</span></div>
-        <div class="scroll"><table id="matrix"></table></div>
+        <div class="row-head"><h2>연도별 수준 (%)</h2><span class="status">회색 글씨 = 그 해 최고·최저를 정한 회사</span></div>
+        <div class="scroll"><table id="table"></table></div>
       </section>
 
       <section class="panel">
         <div class="row-head"><h2>내보내기</h2>
           <div class="btns"><button type="button" id="copy-csv">CSV 복사</button><button type="button" id="copy-json">JSON 시나리오 패키지 복사</button><span class="status" id="copy-status" aria-live="polite"></span></div></div>
-        <p class="hint">CSV는 연도·지역별 한 줄(경쟁사별 값 포함), JSON은 경로와 근거(보고서 페이지·인용)를 함께 담은 시나리오 패키지입니다.</p>
+        <p class="hint">CSV는 연도별 한 줄(시나리오별 열), JSON은 시나리오별 경로와 근거·지역 각주를 담은 패키지입니다.</p>
         <pre class="preview" id="preview"></pre>
       </section>
 
-      <section class="panel">
-        <details>
+      <section class="panel foot" aria-label="각주">
+        <h2>각주</h2>
+        <ol>
+          <li><b>지역 정보는 시나리오에 반영하지 않았습니다.</b> 아래는 경쟁사가 국가·권역 단위로 공시한 RE 비율입니다(최신 연도). 한국 값을 따로 공시한 경쟁사는 없습니다.
+            <div class="scroll" style="margin-top:8px"><table id="regional"></table></div></li>
+          <li><b>목표가 없는 회사</b>는 최근 실적이 그대로 유지됩니다. 현재 Micron은 전사 수치 목표가 없어(미국 100%만 공시) 13%로 유지되고, 이 때문에 업계 최저가 계속 Micron 13%로 나옵니다.</li>
+          <li><b>보고 경계 차이.</b> Micron은 회계연도(FY25 = 2024년 9월~2025년 8월) 기준이며, 13%에는 고객사에 우선 배분한 RE가 포함됩니다(미배분분은 5.9%). SK hynix 데이터 범위는 이천·청주·분당·서울·우시·충칭입니다. TSMC는 본 보고서 대신 2025 Climate and Nature Report를 썼고, 2030년 60% 목표의 연도는 로드맵 그림 기준이라 확인이 필요합니다.</li>
+          <li>경로의 직선 보간은 가정입니다. 회계연도(Micron, 9월~8월)와 역년 차이는 보정하지 않았습니다.</li>
+        </ol>
+        <details style="margin-top:14px">
           <summary>근거 데이터 (보고서 페이지 · 원문 인용)</summary>
           <div class="scroll" style="margin-top:10px"><table class="ev" id="evidence"></table></div>
-          <h2 style="margin-top:16px">보고 경계 · 주의사항</h2>
-          <ul class="notes" id="report-notes"></ul>
         </details>
       </section>
     </div>
@@ -141,13 +147,16 @@ details summary { cursor: pointer; font-weight: 600; }
 <script>
 const DATA = /*__DATA__*/null;
 const BM = DATA.bm;
-const COS = ["tsmc", "skhynix", "intel", "micron"].filter(c => BM.companies[c]);
+const COS = ["tsmc", "skhynix", "intel", "micron"].filter(c => BM.companies[c] && BM.actual.GLOBAL?.[c]);
 const NAME = Object.fromEntries(Object.entries(BM.companies).map(([k, v]) => [k, v.replace(" Technology", "")]));
-const COLOR = c => `var(--c-${c})`;
-const GEO_NAME = { GLOBAL: "전사", KR: "한국", CN: "중국", US: "미국", TW: "대만", JP: "일본", SG: "싱가포르", MY: "말레이시아", IE: "아일랜드", IL: "이스라엘", VN: "베트남", IN: "인도", PL: "폴란드", CR: "코스타리카", OVERSEAS: "TSMC 해외" };
-const ALL_GEOS = ["GLOBAL", "KR", ...Object.keys(BM.actual).filter(g => g !== "GLOBAL" && g !== "KR").sort()];
+const GEO_NAME = { KR: "한국", CN: "중국", US: "미국", TW: "대만", JP: "일본", SG: "싱가포르", MY: "말레이시아", IE: "아일랜드", IL: "이스라엘", VN: "베트남", IN: "인도", PL: "폴란드", CR: "코스타리카", OVERSEAS: "TSMC 해외 자회사" };
+const IND = [["industry_max", "업계 최고 수준"], ["industry_avg", "업계 평균 수준"], ["industry_min", "업계 최저 수준"]];
+const SCEN = [...IND.map(([id, label]) => ({ id, label, ind: true })), ...COS.map(c => ({ id: c, label: `${NAME[c]} 수준`, ind: false }))];
+const COLOR = id => id === "industry_avg" ? "var(--c-ind)" : id.startsWith("industry") ? "var(--muted)" : `var(--c-${id})`;
+const DASH = id => id === "industry_max" ? "6 4" : id === "industry_min" ? "2 4" : "";
 const fmt = (v, d = 1) => v == null || isNaN(v) ? "–" : v.toLocaleString("ko-KR", { maximumFractionDigits: d, minimumFractionDigits: d });
-const state = { mode: "country", method: "average", cos: new Set(COS), geos: new Set(["GLOBAL", "KR", "CN", "US", "TW"].filter(g => ALL_GEOS.includes(g))), from: 2025, to: 2040, view: "KR" };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+const state = { from: 2025, to: 2040, kpi: 2030, cos: new Set(COS), show: new Set(SCEN.map(s => s.id)) };
 const years = () => Array.from({ length: state.to - state.from + 1 }, (_, i) => state.from + i);
 
 // ---------- 계산 (bm_path.py 와 동일 규칙) ----------
@@ -165,144 +174,123 @@ function pathway(actual = {}, targets = {}, YS) {
   }
   return res;
 }
-function aggregate(vals) {
-  const xs = Object.values(vals);
-  if (!xs.length) return null;
-  if (state.method === "leader") return Math.max(...xs);
-  if (state.method === "median") { const s = [...xs].sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
-  if (state.method === "average") return xs.reduce((a, b) => a + b, 0) / xs.length;
-  return vals[state.method] ?? null;
-}
-function geoPaths(geo, YS) {
-  const out = {};
-  for (const c of COS) { const a = BM.actual[geo]?.[c]; if (a) out[c] = pathway(a, BM.targets[geo]?.[c], YS); }
-  return out;
-}
 function compute() {
-  const YS = years(), glob = geoPaths("GLOBAL", YS), rows = [];
-  for (const geo of ALL_GEOS.filter(g => state.geos.has(g))) {
-    const own = geo === "GLOBAL" ? glob : geoPaths(geo, YS);
-    for (const y of YS) {
-      let paths = glob, basis = "global", used = "GLOBAL";
-      if (geo !== "GLOBAL" && state.mode === "country" && COS.some(c => state.cos.has(c) && own[c]?.[y] != null)) { paths = own; basis = "country_reported"; used = geo; }
-      else if (geo !== "GLOBAL" && state.mode === "country") basis = "fallback_global";
-      const vals = {}; for (const c of state.cos) if (paths[c]?.[y] != null) vals[c] = paths[c][y];
-      const row = { year: y, geography: geo, bm_re_ratio_pct: aggregate(vals), basis, geo_used: used, bm_method: state.method, bm_companies: Object.keys(vals).sort().join(",") };
-      for (const c of COS) row[`${c}_pct`] = state.cos.has(c) ? (paths[c]?.[y] ?? null) : null;
-      row._paths = paths; rows.push(row);
-    }
-  }
-  return rows;
+  const YS = years(), paths = Object.fromEntries(COS.map(c => [c, pathway(BM.actual.GLOBAL[c], BM.targets.GLOBAL?.[c], YS)]));
+  return YS.map(y => {
+    const vals = Object.fromEntries([...state.cos].filter(c => paths[c][y] != null).map(c => [c, paths[c][y]]));
+    const xs = Object.values(vals), row = { year: y };
+    if (xs.length) {
+      const hi = Math.max(...xs), lo = Math.min(...xs);
+      Object.assign(row, { industry_max: hi, industry_max_by: Object.keys(vals).filter(c => vals[c] === hi).sort().join(","),
+        industry_avg: xs.reduce((a, b) => a + b, 0) / xs.length,
+        industry_min: lo, industry_min_by: Object.keys(vals).filter(c => vals[c] === lo).sort().join(","), n_companies: xs.length });
+    } else Object.assign(row, { industry_max: null, industry_max_by: "", industry_avg: null, industry_min: null, industry_min_by: "", n_companies: 0 });
+    for (const c of [...COS].sort()) row[c] = paths[c][y];
+    return row;
+  });
 }
 
 // ---------- 렌더 ----------
-function esc(s) { return String(s ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch])); }
-function checks(id, items, isOn, label, swatch) {
-  document.getElementById(id).innerHTML = items.map(v => `<label class="check" for="${id}-${v}"><input type="checkbox" id="${id}-${v}" value="${v}"${isOn(v) ? " checked" : ""}>${swatch ? `<span class="swatch" style="background:${COLOR(v)}"></span>` : ""}${esc(label(v))}</label>`).join("");
-}
 function renderControls() {
-  const m = document.getElementById("method");
-  m.innerHTML = [["average", "평균"], ["median", "중앙값"], ["leader", "최고치 (선도기업)"], ...COS.map(c => [c, NAME[c] + "만"])].map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
-  checks("cos", COS, c => state.cos.has(c), c => NAME[c], true);
-  checks("geos", ALL_GEOS, g => state.geos.has(g), g => `${GEO_NAME[g] || g}${g !== "GLOBAL" && g !== "OVERSEAS" ? " " + g : ""}`, false);
   const ys = Array.from({ length: 2050 - 2021 + 1 }, (_, i) => 2021 + i).map(y => `<option>${y}</option>`).join("");
-  const f = document.getElementById("from"), t = document.getElementById("to");
-  f.innerHTML = ys; t.innerHTML = ys; f.value = state.from; t.value = state.to;
+  for (const [id, v] of [["from", state.from], ["to", state.to]]) { const e = document.getElementById(id); e.innerHTML = ys; e.value = v; }
+  document.getElementById("scen").innerHTML = SCEN.map(s => `<label class="check" for="sc-${s.id}"><input type="checkbox" id="sc-${s.id}" value="${s.id}" checked><span class="swatch line" style="background:${COLOR(s.id)}"></span>${esc(s.label)}</label>`).join("");
+  document.getElementById("cos").innerHTML = COS.map(c => `<label class="check" for="co-${c}"><input type="checkbox" id="co-${c}" value="${c}" checked>${esc(NAME[c])}</label>`).join("");
 }
-function renderTabs() {
-  const geos = ALL_GEOS.filter(g => state.geos.has(g));
-  if (!geos.includes(state.view)) state.view = geos[0];
-  document.getElementById("geo-tabs").innerHTML = geos.map(g => `<button type="button" data-geo="${g}" aria-pressed="${g === state.view}">${GEO_NAME[g] || g}</button>`).join("");
+function renderKpiYear() {
+  const k = document.getElementById("kpi-year"), YS = years();
+  if (!YS.includes(state.kpi)) state.kpi = YS.includes(2030) ? 2030 : YS.at(-1);
+  k.innerHTML = YS.map(y => `<option>${y}</option>`).join(""); k.value = state.kpi;
+}
+const byText = ids => ids ? ids.split(",").map(c => NAME[c]).join(" · ") : "";
+function renderBars(rows) {
+  const r = rows.find(r => r.year === state.kpi);
+  document.getElementById("bars-title").textContent = `${state.kpi}년 수준 비교`;
+  const items = SCEN.filter(s => state.show.has(s.id)).map(s => ({ ...s, v: r?.[s.id], by: r?.[`${s.id}_by`] })).filter(s => s.v != null).sort((a, b) => b.v - a.v);
+  document.getElementById("bars").innerHTML = items.map(s => `<div class="name${s.ind ? " ind" : ""}" style="display:contents"><span class="name"><span class="swatch line" style="background:${COLOR(s.id)}"></span>${esc(s.label)}${s.by ? `<small>${esc(byText(s.by))}</small>` : ""}</span><div class="track"><div class="fill" style="width:${Math.max(0, Math.min(100, s.v))}%;background:${COLOR(s.id)};opacity:${s.ind ? .55 : .85}"></div></div><span class="val">${fmt(s.v)}%</span></div>`).join("") || '<p class="hint">표시할 시나리오를 고르세요.</p>';
 }
 function renderChart(rows) {
-  const rs = rows.filter(r => r.geography === state.view), YS = years();
-  const host = document.getElementById("chart");
-  document.getElementById("chart-title").textContent = `${GEO_NAME[state.view] || state.view} 경로`;
-  if (!rs.length) { host.innerHTML = '<p class="hint">왼쪽에서 지역을 하나 이상 고르세요.</p>'; return; }
-  const W = 760, H = 300, P = { l: 36, r: 120, t: 14, b: 26 };
+  const YS = years(), W = 760, H = 320, P = { l: 36, r: 132, t: 14, b: 26 };
   const x = y => P.l + (YS.length > 1 ? (y - YS[0]) / (YS.at(-1) - YS[0]) : .5) * (W - P.l - P.r);
   const yv = v => P.t + (1 - v / 100) * (H - P.t - P.b);
-  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(GEO_NAME[state.view] || state.view)} 벤치마크 RE 비율 경로">`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="시나리오별 RE 비율 경로">`;
   for (const t of [0, 25, 50, 75, 100]) s += `<line class="grid-l" x1="${P.l}" x2="${W - P.r}" y1="${yv(t)}" y2="${yv(t)}"/><text x="${P.l - 6}" y="${yv(t) + 4}" text-anchor="end">${t}</text>`;
   const step = YS.length > 16 ? 5 : YS.length > 8 ? 2 : 1;
   for (const y of YS.filter(y => (y - YS[0]) % step === 0)) s += `<text x="${x(y)}" y="${H - 6}" text-anchor="middle">${y}</text>`;
+  const band = rows.filter(r => r.industry_max != null);
+  if (band.length && state.show.has("industry_max") && state.show.has("industry_min"))
+    s += `<polygon points="${[...band.map(r => `${x(r.year)},${yv(r.industry_max)}`), ...band.slice().reverse().map(r => `${x(r.year)},${yv(r.industry_min)}`)].join(" ")}" fill="var(--band)" opacity=".8"/>`;
+  const kx = x(state.kpi);
+  s += `<line x1="${kx}" x2="${kx}" y1="${P.t}" y2="${H - P.b}" stroke="var(--muted)" stroke-dasharray="2 3"/>`;
   const labels = [];
-  for (const c of COS) {
-    if (!state.cos.has(c)) continue;
-    const pts = rs.filter(r => r[`${c}_pct`] != null).map(r => [x(r.year), yv(r[`${c}_pct`]), r]);
+  for (const sc of SCEN) {
+    if (!state.show.has(sc.id)) continue;
+    const pts = rows.filter(r => r[sc.id] != null).map(r => [x(r.year), yv(r[sc.id]), r[sc.id]]);
     if (!pts.length) continue;
-    s += `<polyline points="${pts.map(p => p[0] + "," + p[1]).join(" ")}" fill="none" stroke="${COLOR(c)}" stroke-width="1.75" opacity=".85"/>`;
-    labels.push([pts.at(-1)[1], `${NAME[c]} ${fmt(pts.at(-1)[2][`${c}_pct`], 0)}%`, COLOR(c)]);
-  }
-  const bp = rs.filter(r => r.bm_re_ratio_pct != null).map(r => [x(r.year), yv(r.bm_re_ratio_pct), r]);
-  if (bp.length) {
-    s += `<polyline points="${bp.map(p => p[0] + "," + p[1]).join(" ")}" fill="none" stroke="var(--c-bm)" stroke-width="3.5"/>`;
-    for (const [px, py, r] of bp) if (r.basis === "fallback_global") s += `<circle cx="${px}" cy="${py}" r="3" fill="var(--warn)"><title>${r.year}: 국가 공시 없음 → 전사 값</title></circle>`;
-    labels.push([bp.at(-1)[1], `벤치마크 ${fmt(bp.at(-1)[2].bm_re_ratio_pct)}%`, "var(--c-bm)"]);
+    const w = sc.id === "industry_avg" ? 3 : sc.ind ? 1.75 : 2;
+    s += `<polyline points="${pts.map(p => p[0] + "," + p[1]).join(" ")}" fill="none" stroke="${COLOR(sc.id)}" stroke-width="${w}" stroke-dasharray="${DASH(sc.id)}"/>`;
+    labels.push([pts.at(-1)[1], `${sc.label.replace(" 수준", "")} ${fmt(pts.at(-1)[2], 0)}%`, COLOR(sc.id)]);
   }
   labels.sort((a, b) => a[0] - b[0]);
   for (let i = 1; i < labels.length; i++) if (labels[i][0] - labels[i - 1][0] < 13) labels[i][0] = labels[i - 1][0] + 13;
   for (const [ly, t, col] of labels) s += `<text x="${W - P.r + 8}" y="${ly + 4}" style="fill:${col}">${esc(t)}</text>`;
-  host.innerHTML = s + "</svg>";
-  const fb = rs.some(r => r.basis === "fallback_global");
-  document.getElementById("legend").innerHTML = `<span><span class="swatch" style="background:var(--c-bm)"></span>벤치마크 (${document.getElementById("method").selectedOptions[0].text})</span>` +
-    (fb ? `<span><span class="swatch" style="background:var(--warn)"></span>국가 공시가 없어 전사 경로 사용</span>` : "") +
-    `<span>가는 선 = 경쟁사별 경로</span>`;
+  document.getElementById("chart").innerHTML = s + "</svg>";
+  document.getElementById("legend").innerHTML = `<span><span class="swatch" style="background:var(--band)"></span>업계 최고~최저 범위</span><span>굵은 선 = 업계 평균, 긴 점선 = 최고, 짧은 점선 = 최저</span><span>세로 점선 = ${state.kpi}년</span>`;
 }
-function renderMatrix(rows) {
-  const geos = ALL_GEOS.filter(g => state.geos.has(g)), YS = years();
-  const cell = (g, y) => rows.find(r => r.geography === g && r.year === y);
-  document.getElementById("matrix").innerHTML = `<thead><tr><th class="l">연도</th>${geos.map(g => `<th>${GEO_NAME[g] || g}</th>`).join("")}</tr></thead><tbody>` +
-    YS.map(y => `<tr><td class="num">${y}</td>${geos.map(g => { const r = cell(g, y); return `<td class="num${r?.basis === "fallback_global" ? " fb" : ""}" title="${esc(r?.bm_companies.split(",").map(c => NAME[c]).join(", "))}">${fmt(r?.bm_re_ratio_pct)}</td>`; }).join("")}</tr>`).join("") + "</tbody>";
+function renderTable(rows) {
+  const cols = SCEN.filter(s => state.show.has(s.id));
+  document.getElementById("table").innerHTML = `<thead><tr><th class="l">연도</th>${cols.map(s => `<th class="${s.ind ? "ind" : ""}">${esc(s.label.replace(" 수준", ""))}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map(r => `<tr class="${r.year === state.kpi ? "sel" : ""}"><td class="num">${r.year}</td>${cols.map(s => `<td class="num${s.ind ? " ind" : ""}" title="${esc(byText(r[`${s.id}_by`]))}">${fmt(r[s.id])}${r[`${s.id}_by`] && s.id !== "industry_avg" ? `<br><span class="hint">${esc(byText(r[`${s.id}_by`]))}</span>` : ""}</td>`).join("")}</tr>`).join("") + "</tbody>";
 }
-const clean = rows => rows.map(({ _paths, ...r }) => ({ ...r, bm_re_ratio_pct: r.bm_re_ratio_pct == null ? null : +r.bm_re_ratio_pct.toFixed(2),
-  ...Object.fromEntries(COS.map(c => [`${c}_pct`, r[`${c}_pct`] == null ? null : +r[`${c}_pct`].toFixed(2)])) }));
+const r2 = v => v == null ? null : Math.round(v * 100) / 100;
 function toCsv(rows) {
-  const rs = clean(rows); if (!rs.length) return "";
-  const keys = Object.keys(rs[0]);
-  return [keys.join(","), ...rs.map(r => keys.map(k => r[k] == null ? "" : (String(r[k]).includes(",") ? `"${r[k]}"` : r[k])).join(","))].join("\n");
+  if (!rows.length) return "";
+  const keys = Object.keys(rows[0]);
+  return [keys.join(","), ...rows.map(r => keys.map(k => { const v = typeof r[k] === "number" && k !== "year" && k !== "n_companies" ? r2(r[k]) : r[k]; return v == null ? "" : String(v).includes(",") ? `"${v}"` : v; }).join(","))].join("\n");
 }
 function toPackage(rows) {
   const used = [...state.cos].sort();
+  const scen = SCEN.filter(s => state.show.has(s.id)).map(s => ({ id: s.id, label: s.label,
+    path: rows.map(r => ({ year: r.year, re_ratio_pct: r2(r[s.id]), ...(r[`${s.id}_by`] !== undefined ? { set_by: r[`${s.id}_by`] } : {}) })) }));
   return JSON.stringify({
-    scenario_id: `competitor_bm_${state.method}_${state.mode}`, source: "REBM",
-    generated_at: new Date().toISOString().slice(0, 10), method: state.method, mode: state.mode, companies: used,
-    years: [state.from, state.to], geographies: ALL_GEOS.filter(g => state.geos.has(g)),
-    data_status: DATA.dataStatus,
-    rules: "approved A/B values only; actual -> disclosed target linear interpolation, then held flat; country path only where a competitor disclosed that country, else GLOBAL (basis=fallback_global)",
-    targets: clean(rows).map(r => ({ year: r.year, geography: r.geography, bm_re_ratio_pct: r.bm_re_ratio_pct, basis: r.basis, bm_companies: r.bm_companies })),
-    evidence: { actuals: BM.evidence.filter(e => e.kind === "실적" && state.cos.has(e.co)), targets: BM.evidence.filter(e => e.kind === "목표" && state.cos.has(e.co)), reference_contracts: (DATA.contracts || []).filter(k => state.cos.has(k.company_id)) },
+    package_id: "competitor_bm_levels", source: "REBM", generated_at: new Date().toISOString().slice(0, 10),
+    basis: "company-wide (GLOBAL) renewable electricity share, %", companies: used, years: [state.from, state.to], data_status: DATA.dataStatus,
+    rules: "approved A/B values only; each company: latest actual -> disclosed targets by linear interpolation, then held flat (no target: latest actual held); industry_max/avg/min computed per year across companies",
+    scenarios: scen,
+    regional_notes: { note: "Regional (country) disclosures are NOT applied to the scenarios; listed for reference only.", disclosures: DATA.regional.filter(d => used.includes(d.company_id)) },
+    evidence: { actuals: BM.evidence.filter(e => e.kind === "실적" && e.geo === "GLOBAL" && used.includes(e.co)), targets: BM.evidence.filter(e => e.kind === "목표" && e.geo === "GLOBAL" && used.includes(e.co)), reference_contracts: (DATA.contracts || []).filter(k => used.includes(k.company_id)) },
   }, null, 1);
 }
-function renderEvidence() {
-  document.getElementById("evidence").innerHTML = `<thead><tr><th class="l">회사</th><th class="l">범위</th><th class="l">구분</th><th>연도</th><th>RE %</th><th class="l">근거</th><th class="l">원문 인용</th></tr></thead><tbody>` +
-    BM.evidence.map(e => `<tr><td class="l">${esc(NAME[e.co])}</td><td class="l">${esc(GEO_NAME[e.geo] || e.geo)}</td><td class="l">${e.kind}${e.quality === "B_derived" ? " (산출)" : ""}</td><td class="num">${e.year}</td><td class="num">${fmt(e.value)}</td><td class="l">${esc(e.report)} p.${e.page ?? "–"}</td><td class="q">${esc(e.quote)}${e.note ? `<br>※ ${esc(e.note)}` : ""}</td></tr>`).join("") + "</tbody>";
-  document.getElementById("report-notes").innerHTML = COS.flatMap(c => (BM.reports[c] || []).map(r => `<li><b>${esc(NAME[c])}</b> · ${esc(r.title)}: ${esc(r.note)}</li>`)).join("");
+function renderFootnotes() {
+  const byGeo = {};
+  for (const d of DATA.regional) (byGeo[d.geography] ||= []).push(d);
+  const order = Object.keys(byGeo).sort((a, b) => (a === "OVERSEAS") - (b === "OVERSEAS") || a.localeCompare(b));
+  document.getElementById("regional").innerHTML = `<thead><tr><th class="l">국가·권역</th><th class="l">공시 회사와 RE 비율</th></tr></thead><tbody>` +
+    `<tr><td class="l">한국 (KR)</td><td class="l">국가별 공시 없음 (SK hynix 31%는 한국+중국 전사 값)</td></tr>` +
+    order.map(g => `<tr><td class="l">${esc(GEO_NAME[g] || g)}${g !== "OVERSEAS" ? ` (${g})` : ""}</td><td class="l">${byGeo[g].map(d => `${esc(NAME[d.company_id])} ${fmt(d.re_ratio_pct, d.re_ratio_pct % 1 ? 1 : 0)}% <span class="hint">(${d.year}, ${esc(d.report)} p.${d.page})</span>`).join(" · ")}</td></tr>`).join("") + "</tbody>";
+  document.getElementById("evidence").innerHTML = `<thead><tr><th class="l">회사</th><th class="l">구분</th><th>연도</th><th>RE %</th><th class="l">근거</th><th class="l">원문 인용</th></tr></thead><tbody>` +
+    BM.evidence.filter(e => e.geo === "GLOBAL").map(e => `<tr><td class="l">${esc(NAME[e.co])}</td><td class="l">${e.kind}${e.quality === "B_derived" ? " (산출)" : ""}</td><td class="num">${e.year}</td><td class="num">${fmt(e.value)}</td><td class="l">${esc(e.report)} p.${e.page ?? "–"}</td><td class="q">${esc(e.quote)}${e.note ? `<br>※ ${esc(e.note)}` : ""}</td></tr>`).join("") + "</tbody>";
 }
 
 let last = [];
 function update() {
   if (state.from > state.to) [state.from, state.to] = [state.to, state.from];
-  document.getElementById("mode-hint").textContent = state.mode === "country"
-    ? "경쟁사가 그 국가 값을 공시했으면 국가 경로, 없으면 전사 경로를 씁니다."
-    : "모든 지역에 경쟁사 전사 경로를 똑같이 씁니다.";
-  last = compute(); renderTabs(); renderChart(last); renderMatrix(last);
-  document.getElementById("preview").textContent = toCsv(last).split("\n").slice(0, 8).join("\n") + (last.length > 7 ? "\n…" : "");
+  renderKpiYear(); last = compute();
+  renderBars(last); renderChart(last); renderTable(last);
+  document.getElementById("preview").textContent = toCsv(last).split("\n").slice(0, 6).join("\n") + "\n…";
 }
 async function copy(text, label) {
-  const st = document.getElementById("copy-status");
-  try { await navigator.clipboard.writeText(text); st.textContent = `${label}을(를) 복사했습니다.`; document.getElementById("preview").textContent = text.slice(0, 4000) + (text.length > 4000 ? "\n…" : ""); }
-  catch { st.textContent = "복사가 막혀 있습니다. 아래 미리보기에서 선택해 복사하세요."; document.getElementById("preview").textContent = text; }
+  const st = document.getElementById("copy-status"), pv = document.getElementById("preview");
+  try { await navigator.clipboard.writeText(text); st.textContent = `${label}을(를) 복사했습니다.`; pv.textContent = text.slice(0, 4000) + (text.length > 4000 ? "\n…" : ""); }
+  catch { st.textContent = "복사가 막혀 있습니다. 아래 미리보기에서 선택해 복사하세요."; pv.textContent = text; }
 }
 
-renderControls(); renderEvidence(); update();
-document.querySelectorAll("input[name=mode]").forEach(r => r.addEventListener("change", e => { state.mode = e.target.value; update(); }));
-document.getElementById("method").addEventListener("change", e => { state.method = e.target.value; update(); });
-document.getElementById("cos").addEventListener("change", e => { e.target.checked ? state.cos.add(e.target.value) : state.cos.delete(e.target.value); update(); });
-document.getElementById("geos").addEventListener("change", e => { e.target.checked ? state.geos.add(e.target.value) : state.geos.delete(e.target.value); update(); });
+renderControls(); renderFootnotes(); update();
+document.getElementById("kpi-year").addEventListener("change", e => { state.kpi = +e.target.value; update(); });
 document.getElementById("from").addEventListener("change", e => { state.from = +e.target.value; update(); });
 document.getElementById("to").addEventListener("change", e => { state.to = +e.target.value; update(); });
-document.getElementById("geo-tabs").addEventListener("click", e => { const g = e.target.closest("button")?.dataset.geo; if (g) { state.view = g; update(); } });
+document.getElementById("scen").addEventListener("change", e => { e.target.checked ? state.show.add(e.target.value) : state.show.delete(e.target.value); update(); });
+document.getElementById("cos").addEventListener("change", e => { e.target.checked ? state.cos.add(e.target.value) : state.cos.delete(e.target.value); update(); });
 document.getElementById("copy-csv").addEventListener("click", () => copy(toCsv(last), "CSV"));
 document.getElementById("copy-json").addEventListener("click", () => copy(toPackage(last), "JSON 시나리오 패키지"));
 </script>

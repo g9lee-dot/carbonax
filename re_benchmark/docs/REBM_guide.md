@@ -170,18 +170,29 @@ year,site,country,demand_mwh,grid_ef_tco2_per_mwh
 
 **더미 기준 결과 (2030년, 평균):** 전사 기준 벤치마크 51.5%, 필요 RE 약 16.0 TWh. 국가별 기준 수요 가중 64.9%, 약 20.2 TWh(중국·미국 100%, 한국은 전사 51.5%로 대체).
 
-### 6-1. 경쟁사 BM 경로 생성기 (수요 없이 경로만)
+### 6-1. 경쟁사 RE 수준 비교 (수요 없이 시나리오만)
 
-6장의 앞부분(경로 생성 → 집계 → 지역 적용)만 따로 떼어낸 도구입니다. 우리 회사 수요·배출계수는 받지 않고, 연도·지역별 벤치마크 RE 비율만 내보냅니다. RE 시뮬레이터에 목표로 넘기는 용도입니다.
+6장과 달리 우리 회사 수요·배출계수 없이, "누구 수준을 따라가면" 시나리오들을 나란히 만듭니다. RE 시뮬레이터에 목표 경로로 넘기는 용도입니다.
 
-- **받는 것:** 승인된 경쟁사 RE 비율 실적·목표(DB), 조건(연도 범위, 지역 목록, 국가별/전사 통일, 집계 방법, 포함 회사)
-- **처리:** 6장 1~3과 같은 규칙. 국가별 모드에서 경쟁사가 그 국가를 공시하지 않았으면 전사 경로로 대체하고 basis=fallback_global로 표시
+- **받는 것:** 승인된 경쟁사 전사 RE 비율 실적·목표(DB), 연도 범위, 업계 수준 계산에 포함할 회사
+- **처리:** 회사별 경로는 6장 1과 같은 규칙. 업계 최고·평균·최저는 연도마다 포함 회사 경로 중 최고값·평균·최저값이며, 그 해 최고·최저를 정한 회사도 기록합니다.
 - **내보내는 것:**
-  - CSV: `year, geography, bm_re_ratio_pct, basis, geo_used, bm_method, bm_companies, <회사>_pct …`
-  - JSON 시나리오 패키지: 위 경로 + 근거(실적·목표의 보고서·페이지·인용, 참고 계약)
-- **실행:** `python -m re_bm.cli bm-path --from-year 2025 --to-year 2040 --geos GLOBAL,KR,CN,US,TW --mode country --method average`, 화면 툴은 `tool/bm_path_tool.html`
+  - CSV(`data/output/bm_levels.csv`): `year, industry_max, industry_max_by, industry_avg, industry_min, industry_min_by, n_companies, intel, micron, skhynix, tsmc`
+  - JSON 시나리오 패키지(`data/output/bm_levels.json`): 시나리오별 경로(`scenarios[].path`), 근거, 지역 각주(`regional_notes`)
+- **실행:** `python -m re_bm.cli bm-levels --from-year 2025 --to-year 2040`, 화면 툴은 `tool/bm_levels_tool.html`
+- **지역:** 국가별 공시값은 시나리오에 반영하지 않고 각주로만 제공합니다(5장 국가별 표와 같은 내용).
 
-현재 데이터(평균, 국가별)로는 한국이 전사 값(2030년 51.5%, 2040년 69.9%)으로 대체되고, 중국·미국은 100%, 대만은 TSMC 대만 실적 11.5%가 유지됩니다. 대만에는 TSMC의 국가별 목표가 없어서 전사 목표(2030년 60%)가 대만 경로에는 반영되지 않는 점에 유의하세요.
+| 시나리오 | 2025 | 2030 | 2035 | 2040 |
+| --- | --- | --- | --- | --- |
+| 업계 최고 | 99.0 (Intel) | 100 (Intel) | 100 (Intel) | 100 (Intel·TSMC) |
+| 업계 평균 | 40.8 | 51.5 | 60.7 | 69.9 |
+| 업계 최저 | 13.0 (Micron) | 13.0 (Micron) | 13.0 (Micron) | 13.0 (Micron) |
+| TSMC | 20.1 | 60.0 | 80.0 | 100 |
+| SK hynix | 31.0 | 33.0 | 49.8 | 66.5 |
+| Intel | 99.0 | 100 | 100 | 100 |
+| Micron | 13.0 | 13.0 | 13.0 | 13.0 |
+
+단위: 전사 RE 전력 비율(%). Micron은 전사 수치 목표가 없어 최근 실적 13%가 유지되므로, 업계 최저는 계속 Micron 13%입니다.
 
 ## 7. RE 시뮬레이터 연계 검토 포인트
 
@@ -196,7 +207,7 @@ REBM은 "어느 수준까지 가야 하는가(경쟁사 근거)"를, RE 시뮬�
 | 가정 검증 | REBM 계약 사례(re_contracts) → 시뮬레이터 수단 가정 점검 | 규모·형태 참고값 (예: Micron 텍사스 VPPA 238MW, SK hynix 국내 수력 PPA) |
 | 비교 시각화 | 시뮬레이터 결과를 REBM 경로 차트에 중첩 | 우리 계획 vs 경쟁사 경로 |
 
-**인터페이스 계약안 (파일 교환, JSON).** REBM이 내보내고 시뮬레이터가 읽는 형태입니다. 6-1의 `bm-path`가 이 형식의 시나리오 패키지를 이미 만들며(근거는 evidence 항목에 포함), 시뮬레이터 입력 형식이 확정되면 맞춰 조정합니다.
+**인터페이스 계약안 (파일 교환, JSON).** REBM이 내보내고 시뮬레이터가 읽는 형태입니다. 6-1의 `bm-levels`가 시나리오별 경로·근거·지역 각주를 담은 패키지를 이미 만들며, 시뮬레이터 입력 형식이 확정되면 맞춰 조정합니다.
 
 ```json
 {
@@ -240,7 +251,7 @@ REBM은 "어느 수준까지 가야 하는가(경쟁사 근거)"를, RE 시뮬�
 
 - [ ] 추출값 실제 검토 (`review export` → 승인/반려 → `review import`)
 - [ ] 사내 전력수요 전망·배출계수로 더미 대체
-- [ ] RE 시뮬레이터 입력 형식 확인 후 `bm-path` 시나리오 패키지 형식 조정
+- [ ] RE 시뮬레이터 입력 형식 확인 후 `bm-levels` 시나리오 패키지 형식 조정
 - [ ] Anthropic API 연결로 추출 자동화, 경쟁사 추가 시 매년 갱신
 
 **파일·명령어 (`re_benchmark/` 기준)**
@@ -256,7 +267,7 @@ REBM은 "어느 수준까지 가야 하는가(경쟁사 근거)"를, RE 시뮬�
 | 비율 산출(B등급) | `python -m re_bm.cli derive` |
 | 시나리오 CSV | `python -m re_bm.cli scenario <수요CSV> --mode global\|country --method average\|median\|leader\|<회사>` |
 | 계산 툴 | `python -m re_bm.tool` → `tool/re_bm_tool.html` |
-| BM 경로만 | `python -m re_bm.cli bm-path …` → `data/output/bm_path_*.csv/json`, 화면 툴 `tool/bm_path_tool.html` |
+| 수준 비교 | `python -m re_bm.cli bm-levels …` → `data/output/bm_levels.csv/json`, 화면 툴 `tool/bm_levels_tool.html` |
 | 테스트 | `python -m pytest tests` |
 | 워크플로우 그림 | `docs/workflow.html` |
 

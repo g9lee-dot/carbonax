@@ -30,12 +30,9 @@ def main():
     s.add_argument("--method", default="average", help="leader | average | median | <company_id>")
     s.add_argument("--companies", help="쉼표 구분 company_id (기본: 데이터 있는 전체)")
 
-    b = sub.add_parser("bm-path", help="경쟁사 정보만으로 연도·지역별 BM RE 비율 경로 생성 (수요 불필요)")
+    b = sub.add_parser("bm-levels", help="경쟁사 수준 비교 시나리오 (업계 최고/평균/최저 + 회사별, 수요 불필요)")
     b.add_argument("--from-year", type=int, default=2025)
     b.add_argument("--to-year", type=int, default=2040)
-    b.add_argument("--geos", default="GLOBAL,KR,CN,US,TW", help="쉼표 구분 (GLOBAL 또는 ISO 국가코드)")
-    b.add_argument("--mode", choices=["global", "country"], default="country")
-    b.add_argument("--method", default="average", help="leader | average | median | <company_id>")
     b.add_argument("--companies", help="쉼표 구분 company_id (기본: 전체)")
     b.add_argument("--out-dir", type=Path, default=db.ROOT / "data" / "output")
 
@@ -55,13 +52,11 @@ def main():
             print(f"{review.import_(conn, a.dir)} rows updated")
     elif a.cmd == "derive":
         print(f"{validate.derive_ratios(conn)} derived ratios added")
-    elif a.cmd == "bm-path":
+    elif a.cmd == "bm-levels":
         years = list(range(a.from_year, a.to_year + 1))
-        geos = [g.strip().upper() for g in a.geos.split(",") if g.strip()]
         cos = a.companies.split(",") if a.companies else None
-        rows = bm_path.build(conn, years, geos, a.method, cos, a.mode)
-        pkg = bm_path.package(conn, rows, years, geos, a.method, cos, a.mode)
-        print("written:", *bm_path.write(rows, pkg, a.out_dir, f"bm_path_{a.method}_{a.mode}"))
+        rows = bm_path.build(conn, years, cos)
+        print("written:", *bm_path.write(rows, bm_path.package(conn, rows, years, cos), a.out_dir))
     elif a.cmd == "scenario":
         cos = a.companies.split(",") if a.companies else None
         print("written:", scenario.run(conn, a.demand_csv, a.out, a.mode, a.method, cos))

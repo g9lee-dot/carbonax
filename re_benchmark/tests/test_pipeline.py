@@ -95,19 +95,19 @@ def test_review_roundtrip(conn, tmp_path):
     assert conn.execute("SELECT value_std FROM re_metrics").fetchone()[0] == 51
 
 
-def test_bm_path_country_and_fallback(conn):
+def test_bm_levels(conn):
     from re_bm import bm_path
     add(conn, 1, "intel", 2025, "GLOBAL", "re_ratio", 60, "%")
     add(conn, 2, "micron", 2025, "GLOBAL", "re_ratio", 20, "%")
     add(conn, 2, "micron", 2025, "US", "re_ratio", 100, "%")
     conn.execute("INSERT INTO re_targets(report_id, company_id, geography, target_year, target_re_ratio, review_status)"
                  " VALUES (1,'intel','GLOBAL',2030,100,'approved')")
-    rows = bm_path.build(conn, [2025, 2030], ["GLOBAL", "US", "KR"], "average", None, "country")
-    r = {(x["year"], x["geography"]): x for x in rows}
-    assert r[(2030, "GLOBAL")]["bm_re_ratio_pct"] == 60          # (100 + 20) / 2
-    assert r[(2030, "US")]["basis"] == "country_reported" and r[(2030, "US")]["bm_re_ratio_pct"] == 100
-    assert r[(2030, "KR")]["basis"] == "fallback_global" and r[(2030, "KR")]["bm_re_ratio_pct"] == 60
-    lead = bm_path.build(conn, [2030], ["KR"], "leader", None, "global")
-    assert lead[0]["bm_re_ratio_pct"] == 100 and lead[0]["basis"] == "global"
-    pkg = bm_path.package(conn, rows, [2025, 2030], ["GLOBAL", "US", "KR"], "average", None, "country")
-    assert len(pkg["targets"]) == 6 and pkg["evidence"]["targets"][0]["re_ratio_pct"] == 100
+    rows = {r["year"]: r for r in bm_path.build(conn, [2025, 2030])}
+    r = rows[2030]
+    assert (r["industry_max"], r["industry_max_by"]) == (100, "intel")
+    assert (r["industry_min"], r["industry_min_by"]) == (20, "micron")   # 목표 없는 회사는 실적 유지
+    assert r["industry_avg"] == 60 and r["intel"] == 100 and r["micron"] == 20
+    assert bm_path.build(conn, [2030], ["micron"])[0]["industry_max"] == 20  # 포함 회사 제한
+    pkg = bm_path.package(conn, list(rows.values()), [2025, 2030])
+    assert [s["id"] for s in pkg["scenarios"]] == ["industry_max", "industry_avg", "industry_min", "intel", "micron"]
+    assert pkg["regional_notes"]["disclosures"][0]["geography"] == "US"    # 지역은 각주로만
