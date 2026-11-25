@@ -59,6 +59,7 @@ python -m re_bm.tool      # tool/re_bm_tool.html 생성 (+ data/our_demand_dummy
 우리 회사 수요·배출계수 없이, 경쟁사 공시값만으로 "누구 수준을 따라가면" 시나리오를 만든다.
 시나리오: 업계 최고 / 업계 평균 / 업계 최저 (연도별, 포함 회사 기준) + TSMC·SK hynix·Intel·Micron 각 사 수준.
 모두 전사 RE 전력 비율 기준이며, 국가별 공시값은 시나리오에 쓰지 않고 각주(regional_notes)로만 제공한다.
+업계 최고/평균/최저는 전사 RE 목표를 공시한 회사로만 계산한다 (목표 미공시 회사 포함: `--include-no-target`).
 
 ```bash
 python -m re_bm.cli bm-levels --from-year 2025 --to-year 2040 [--companies tsmc,intel,...]

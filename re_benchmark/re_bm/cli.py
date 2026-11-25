@@ -34,6 +34,8 @@ def main():
     b.add_argument("--from-year", type=int, default=2025)
     b.add_argument("--to-year", type=int, default=2040)
     b.add_argument("--companies", help="쉼표 구분 company_id (기본: 전체)")
+    b.add_argument("--include-no-target", action="store_true",
+                   help="전사 RE 목표를 공시하지 않은 회사도 업계 최고/평균/최저 계산에 포함 (기본: 제외)")
     b.add_argument("--out-dir", type=Path, default=db.ROOT / "data" / "output")
 
     a = p.parse_args()
@@ -55,8 +57,11 @@ def main():
     elif a.cmd == "bm-levels":
         years = list(range(a.from_year, a.to_year + 1))
         cos = a.companies.split(",") if a.companies else None
-        rows = bm_path.build(conn, years, cos)
-        print("written:", *bm_path.write(rows, bm_path.package(conn, rows, years, cos), a.out_dir))
+        rows = bm_path.build(conn, years, cos, a.include_no_target)
+        pkg = bm_path.package(conn, rows, years, cos, a.include_no_target)
+        print("industry levels from:", ", ".join(pkg["industry_companies"]),
+              "| excluded:", ", ".join(e["company_id"] for e in pkg["excluded_from_industry"]) or "-")
+        print("written:", *bm_path.write(rows, pkg, a.out_dir))
     elif a.cmd == "scenario":
         cos = a.companies.split(",") if a.companies else None
         print("written:", scenario.run(conn, a.demand_csv, a.out, a.mode, a.method, cos))

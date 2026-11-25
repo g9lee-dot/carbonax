@@ -1,7 +1,7 @@
 {
  "package_id": "competitor_bm_levels",
  "source": "REBM",
- "generated_at": "2026-11-24",
+ "generated_at": "2026-11-25",
  "basis": "company-wide (GLOBAL) renewable electricity share, %",
  "companies": [
   "intel",
@@ -9,12 +9,24 @@
   "skhynix",
   "tsmc"
  ],
+ "industry_companies": [
+  "intel",
+  "skhynix",
+  "tsmc"
+ ],
+ "industry_rule": "only companies that disclosed a company-wide RE share target with a target year; companies without one keep their latest actual flat and are shown as their own scenario only",
+ "excluded_from_industry": [
+  {
+   "company_id": "micron",
+   "reason": "no company-wide RE share target disclosed"
+  }
+ ],
  "years": [
   2025,
   2040
  ],
  "data_status": "approved (bulk assumed, not reviewed)",
- "rules": "approved A/B values only; each company: latest actual -> disclosed targets by linear interpolation, then held flat (no target: latest actual held); industry_max/avg/min computed per year across companies",
+ "rules": "approved A/B values only; each company: latest actual -> disclosed targets by linear interpolation, then held flat (no target: latest actual held); industry_max/avg/min computed per year across industry_companies",
  "scenarios": [
   {
    "id": "industry_max",
@@ -108,67 +120,67 @@
    "path": [
     {
      "year": 2025,
-     "re_ratio_pct": 40.77
+     "re_ratio_pct": 50.03
     },
     {
      "year": 2026,
-     "re_ratio_pct": 42.82
+     "re_ratio_pct": 52.76
     },
     {
      "year": 2027,
-     "re_ratio_pct": 44.99
+     "re_ratio_pct": 55.65
     },
     {
      "year": 2028,
-     "re_ratio_pct": 47.16
+     "re_ratio_pct": 58.55
     },
     {
      "year": 2029,
-     "re_ratio_pct": 49.33
+     "re_ratio_pct": 61.44
     },
     {
      "year": 2030,
-     "re_ratio_pct": 51.5
+     "re_ratio_pct": 64.33
     },
     {
      "year": 2031,
-     "re_ratio_pct": 53.34
+     "re_ratio_pct": 66.78
     },
     {
      "year": 2032,
-     "re_ratio_pct": 55.17
+     "re_ratio_pct": 69.23
     },
     {
      "year": 2033,
-     "re_ratio_pct": 57.01
+     "re_ratio_pct": 71.68
     },
     {
      "year": 2034,
-     "re_ratio_pct": 58.85
+     "re_ratio_pct": 74.13
     },
     {
      "year": 2035,
-     "re_ratio_pct": 60.69
+     "re_ratio_pct": 76.58
     },
     {
      "year": 2036,
-     "re_ratio_pct": 62.52
+     "re_ratio_pct": 79.03
     },
     {
      "year": 2037,
-     "re_ratio_pct": 64.36
+     "re_ratio_pct": 81.48
     },
     {
      "year": 2038,
-     "re_ratio_pct": 66.2
+     "re_ratio_pct": 83.93
     },
     {
      "year": 2039,
-     "re_ratio_pct": 68.04
+     "re_ratio_pct": 86.38
     },
     {
      "year": 2040,
-     "re_ratio_pct": 69.88
+     "re_ratio_pct": 88.83
     }
    ]
   },
@@ -178,83 +190,83 @@
    "path": [
     {
      "year": 2025,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 20.1,
+     "set_by": "tsmc"
     },
     {
      "year": 2026,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 28.08,
+     "set_by": "tsmc"
     },
     {
      "year": 2027,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 31.5,
+     "set_by": "skhynix"
     },
     {
      "year": 2028,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 32.0,
+     "set_by": "skhynix"
     },
     {
      "year": 2029,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 32.5,
+     "set_by": "skhynix"
     },
     {
      "year": 2030,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 33.0,
+     "set_by": "skhynix"
     },
     {
      "year": 2031,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 36.35,
+     "set_by": "skhynix"
     },
     {
      "year": 2032,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 39.7,
+     "set_by": "skhynix"
     },
     {
      "year": 2033,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 43.05,
+     "set_by": "skhynix"
     },
     {
      "year": 2034,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 46.4,
+     "set_by": "skhynix"
     },
     {
      "year": 2035,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 49.75,
+     "set_by": "skhynix"
     },
     {
      "year": 2036,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 53.1,
+     "set_by": "skhynix"
     },
     {
      "year": 2037,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 56.45,
+     "set_by": "skhynix"
     },
     {
      "year": 2038,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 59.8,
+     "set_by": "skhynix"
     },
     {
      "year": 2039,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 63.15,
+     "set_by": "skhynix"
     },
     {
      "year": 2040,
-     "re_ratio_pct": 13.0,
-     "set_by": "micron"
+     "re_ratio_pct": 66.5,
+     "set_by": "skhynix"
     }
    ]
   },

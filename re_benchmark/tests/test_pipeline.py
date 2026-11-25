@@ -104,10 +104,13 @@ def test_bm_levels(conn):
                  " VALUES (1,'intel','GLOBAL',2030,100,'approved')")
     rows = {r["year"]: r for r in bm_path.build(conn, [2025, 2030])}
     r = rows[2030]
-    assert (r["industry_max"], r["industry_max_by"]) == (100, "intel")
-    assert (r["industry_min"], r["industry_min_by"]) == (20, "micron")   # 목표 없는 회사는 실적 유지
-    assert r["industry_avg"] == 60 and r["intel"] == 100 and r["micron"] == 20
-    assert bm_path.build(conn, [2030], ["micron"])[0]["industry_max"] == 20  # 포함 회사 제한
+    # 기본: 전사 목표를 공시한 회사(intel)만 업계 수준에 포함, micron 은 자기 시나리오로만
+    assert (r["industry_max"], r["industry_min"], r["industry_avg"], r["n_companies"]) == (100, 100, 100, 1)
+    assert r["intel"] == 100 and r["micron"] == 20                       # 목표 없는 회사는 실적 유지
+    incl = {x["year"]: x for x in bm_path.build(conn, [2025, 2030], include_no_target=True)}[2030]
+    assert (incl["industry_min"], incl["industry_min_by"], incl["industry_avg"]) == (20, "micron", 60)
+    assert bm_path.build(conn, [2030], ["micron"], include_no_target=True)[0]["industry_max"] == 20
     pkg = bm_path.package(conn, list(rows.values()), [2025, 2030])
+    assert pkg["industry_companies"] == ["intel"] and pkg["excluded_from_industry"][0]["company_id"] == "micron"
     assert [s["id"] for s in pkg["scenarios"]] == ["industry_max", "industry_avg", "industry_min", "intel", "micron"]
     assert pkg["regional_notes"]["disclosures"][0]["geography"] == "US"    # 지역은 각주로만

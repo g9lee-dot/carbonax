@@ -1,6 +1,9 @@
 """경쟁사 BM 수준 비교 생성기: 우리 회사 수요 없이 경쟁사 공시값만으로 '누구 수준을 따라가면' 시나리오들을 만든다.
 
 시나리오 (모두 전사 RE 전력 비율 기준)
+업계 수준(industry_*)은 '전사 RE 비율 목표(연도 포함)를 공시한 회사'로만 계산한다 (include_no_target=False 기본).
+목표가 없는 회사는 최근 실적이 고정되므로, 넣으면 업계 최저·평균이 '개선 없음' 가정에 끌려간다. 회사별 시나리오로는 그대로 남는다.
+
 - industry_max : 업계 최고 수준 (연도마다 포함 회사 경로 중 최고값, 그 연도의 선도 회사 기록)
 - industry_avg : 업계 평균 수준
 - industry_min : 업계 최저 수준 (연도마다 최저값, 그 연도의 최저 회사 기록)
@@ -35,12 +38,23 @@ def company_paths(conn, years: list[int], companies: list[str] | None = None) ->
     return {c: pathway(act[c], tgt.get(c, {}), years) for c in cos}
 
 
-def build(conn, years: list[int], companies: list[str] | None = None) -> list[dict]:
-    """연도별 한 줄: 업계 최고/평균/최저 + 회사별 수준."""
+def companies_with_target(conn) -> set[str]:
+    """전사(GLOBAL) RE 비율 목표를 공시(승인)한 회사."""
+    return {r[0] for r in conn.execute(
+        "SELECT DISTINCT company_id FROM re_targets WHERE geography='GLOBAL' AND review_status='approved'")}
+
+
+def industry_members(conn, paths: dict, include_no_target: bool = False) -> list[str]:
+    return sorted(paths) if include_no_target else sorted(c for c in paths if c in companies_with_target(conn))
+
+
+def build(conn, years: list[int], companies: list[str] | None = None, include_no_target: bool = False) -> list[dict]:
+    """연도별 한 줄: 업계 최고/평균/최저(목표 공시 회사 기준) + 회사별 수준."""
     paths = company_paths(conn, years, companies)
+    members = industry_members(conn, paths, include_no_target)
     rows = []
     for y in years:
-        vals = {c: p[y] for c, p in paths.items() if p[y] is not None}
+        vals = {c: paths[c][y] for c in members if paths[c][y] is not None}
         row = {"year": y}
         if vals:
             hi, lo = max(vals.values()), min(vals.values())
@@ -104,9 +118,12 @@ def data_status(conn) -> str:
     return "approved" if not pending else f"approved, {pending} pending excluded"
 
 
-def package(conn, rows: list[dict], years: list[int], companies: list[str] | None = None) -> dict:
+def package(conn, rows: list[dict], years: list[int], companies: list[str] | None = None,
+            include_no_target: bool = False) -> dict:
     names = company_names(conn)
     cos = [k for k in rows[0] if k in names]
+    with_t = companies_with_target(conn)
+    members = cos if include_no_target else [c for c in cos if c in with_t]
     scen = [{"id": sid, "label": label,
              "path": [{"year": r["year"], "re_ratio_pct": r[sid],
                        **({"set_by": r[f"{sid}_by"]} if f"{sid}_by" in r else {})} for r in rows]}
@@ -119,10 +136,16 @@ def package(conn, rows: list[dict], years: list[int], companies: list[str] | Non
         "generated_at": date.today().isoformat(),
         "basis": "company-wide (GLOBAL) renewable electricity share, %",
         "companies": cos,
+        "industry_companies": members,
+        "industry_rule": ("all companies" if include_no_target else
+                          "only companies that disclosed a company-wide RE share target with a target year; "
+                          "companies without one keep their latest actual flat and are shown as their own scenario only"),
+        "excluded_from_industry": [{"company_id": c, "reason": "no company-wide RE share target disclosed"}
+                                   for c in cos if c not in members],
         "years": [years[0], years[-1]],
         "data_status": data_status(conn),
         "rules": "approved A/B values only; each company: latest actual -> disclosed targets by linear interpolation, "
-                 "then held flat (no target: latest actual held); industry_max/avg/min computed per year across companies",
+                 "then held flat (no target: latest actual held); industry_max/avg/min computed per year across industry_companies",
         "scenarios": scen,
         "regional_notes": {
             "note": "Regional (country) disclosures are NOT applied to the scenarios; listed for reference only.",

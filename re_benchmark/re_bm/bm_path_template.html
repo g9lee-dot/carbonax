@@ -98,8 +98,9 @@ details summary { cursor: pointer; font-weight: 600; }
         <div class="range"><select id="from" aria-label="시작 연도"></select><span>~</span><select id="to" aria-label="끝 연도"></select></div>
       </fieldset>
       <fieldset><legend>표시할 시나리오</legend><div id="scen"></div></fieldset>
-      <fieldset><legend>업계 수준 계산에 포함할 회사</legend><div id="cos"></div></fieldset>
-      <p class="hint">업계 최고 · 평균 · 최저는 연도마다 포함한 회사 경로 중 최고값, 평균, 최저값입니다. 목표를 공시하지 않은 회사는 최근 실적이 유지됩니다(각주 2).</p>
+      <fieldset><legend>업계 수준 계산에 포함할 회사</legend><div id="cos"></div>
+        <label class="check" for="incl-no-target" style="margin-top:6px"><input type="checkbox" id="incl-no-target">전사 RE 목표 미공시 회사도 포함</label></fieldset>
+      <p class="hint">업계 최고 · 평균 · 최저는 <b>전사 RE 목표를 공시한 회사</b>만으로, 연도마다 최고값 · 평균 · 최저값을 냅니다. 목표가 없는 회사는 자기 시나리오로만 표시됩니다(각주 2).</p>
     </aside>
 
     <div class="stack">
@@ -131,7 +132,7 @@ details summary { cursor: pointer; font-weight: 600; }
         <ol>
           <li><b>지역 정보는 시나리오에 반영하지 않았습니다.</b> 아래는 경쟁사가 국가·권역 단위로 공시한 RE 비율입니다(최신 연도). 한국 값을 따로 공시한 경쟁사는 없습니다.
             <div class="scroll" style="margin-top:8px"><table id="regional"></table></div></li>
-          <li><b>목표가 없는 회사</b>는 최근 실적이 그대로 유지됩니다. 현재 Micron은 전사 수치 목표가 없어(미국 100%만 공시) 13%로 유지되고, 이 때문에 업계 최저가 계속 Micron 13%로 나옵니다.</li>
+          <li><b>업계 수준 산정 규칙.</b> 업계 최고 · 평균 · 최저는 연도가 붙은 전사 RE 비율 목표를 공시한 회사(현재 <span id="members"></span>)로만 계산합니다. 목표가 없는 회사는 경로가 최근 실적에 고정되어, 넣으면 업계 최저 · 평균이 '개선 없음' 가정에 끌려가기 때문입니다. Micron은 미국 100%(2025년 말, 달성), 말레이시아 · 중국 100% 유지, 연도 없는 '가능한 곳에서 전 세계 무탄소전력 100%' 지향, Scope 1+2 넷제로 2050년(지향)을 공시했지만 연도가 붙은 전사 RE 비율 목표는 없어 제외했습니다(2026 보고서 p.34~35). 그래서 Micron 수준 시나리오는 FY25 실적 13%로 유지됩니다. 목표를 공시하면 자동으로 다시 포함됩니다.</li>
           <li><b>보고 경계 차이.</b> Micron은 회계연도(FY25 = 2024년 9월~2025년 8월) 기준이며, 13%에는 고객사에 우선 배분한 RE가 포함됩니다(미배분분은 5.9%). SK hynix 데이터 범위는 이천·청주·분당·서울·우시·충칭입니다. TSMC는 본 보고서 대신 2025 Climate and Nature Report를 썼고, 2030년 60% 목표의 연도는 로드맵 그림 기준이라 확인이 필요합니다.</li>
           <li>경로의 직선 보간은 가정입니다. 회계연도(Micron, 9월~8월)와 역년 차이는 보정하지 않았습니다.</li>
         </ol>
@@ -156,7 +157,9 @@ const COLOR = id => id === "industry_avg" ? "var(--c-ind)" : id.startsWith("indu
 const DASH = id => id === "industry_max" ? "6 4" : id === "industry_min" ? "2 4" : "";
 const fmt = (v, d = 1) => v == null || isNaN(v) ? "–" : v.toLocaleString("ko-KR", { maximumFractionDigits: d, minimumFractionDigits: d });
 const esc = s => String(s ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
-const state = { from: 2025, to: 2040, kpi: 2030, cos: new Set(COS), show: new Set(SCEN.map(s => s.id)) };
+const HAS_TARGET = new Set(Object.keys(BM.targets.GLOBAL || {}));
+const state = { from: 2025, to: 2040, kpi: 2030, cos: new Set(COS), show: new Set(SCEN.map(s => s.id)), inclNoTarget: false };
+const members = () => [...state.cos].filter(c => state.inclNoTarget || HAS_TARGET.has(c)).sort();
 const years = () => Array.from({ length: state.to - state.from + 1 }, (_, i) => state.from + i);
 
 // ---------- 계산 (bm_path.py 와 동일 규칙) ----------
@@ -177,7 +180,7 @@ function pathway(actual = {}, targets = {}, YS) {
 function compute() {
   const YS = years(), paths = Object.fromEntries(COS.map(c => [c, pathway(BM.actual.GLOBAL[c], BM.targets.GLOBAL?.[c], YS)]));
   return YS.map(y => {
-    const vals = Object.fromEntries([...state.cos].filter(c => paths[c][y] != null).map(c => [c, paths[c][y]]));
+    const vals = Object.fromEntries(members().filter(c => paths[c][y] != null).map(c => [c, paths[c][y]]));
     const xs = Object.values(vals), row = { year: y };
     if (xs.length) {
       const hi = Math.max(...xs), lo = Math.min(...xs);
@@ -195,7 +198,7 @@ function renderControls() {
   const ys = Array.from({ length: 2050 - 2021 + 1 }, (_, i) => 2021 + i).map(y => `<option>${y}</option>`).join("");
   for (const [id, v] of [["from", state.from], ["to", state.to]]) { const e = document.getElementById(id); e.innerHTML = ys; e.value = v; }
   document.getElementById("scen").innerHTML = SCEN.map(s => `<label class="check" for="sc-${s.id}"><input type="checkbox" id="sc-${s.id}" value="${s.id}" checked><span class="swatch line" style="background:${COLOR(s.id)}"></span>${esc(s.label)}</label>`).join("");
-  document.getElementById("cos").innerHTML = COS.map(c => `<label class="check" for="co-${c}"><input type="checkbox" id="co-${c}" value="${c}" checked>${esc(NAME[c])}</label>`).join("");
+  document.getElementById("cos").innerHTML = COS.map(c => `<label class="check" for="co-${c}"><input type="checkbox" id="co-${c}" value="${c}" checked>${esc(NAME[c])}${HAS_TARGET.has(c) ? "" : ' <span class="hint">(전사 목표 미공시)</span>'}</label>`).join("");
 }
 function renderKpiYear() {
   const k = document.getElementById("kpi-year"), YS = years();
@@ -249,16 +252,18 @@ function toCsv(rows) {
   return [keys.join(","), ...rows.map(r => keys.map(k => { const v = typeof r[k] === "number" && k !== "year" && k !== "n_companies" ? r2(r[k]) : r[k]; return v == null ? "" : String(v).includes(",") ? `"${v}"` : v; }).join(","))].join("\n");
 }
 function toPackage(rows) {
-  const used = [...state.cos].sort();
+  const used = [...state.cos].sort(), mem = members();
   const scen = SCEN.filter(s => state.show.has(s.id)).map(s => ({ id: s.id, label: s.label,
     path: rows.map(r => ({ year: r.year, re_ratio_pct: r2(r[s.id]), ...(r[`${s.id}_by`] !== undefined ? { set_by: r[`${s.id}_by`] } : {}) })) }));
   return JSON.stringify({
     package_id: "competitor_bm_levels", source: "REBM", generated_at: new Date().toISOString().slice(0, 10),
-    basis: "company-wide (GLOBAL) renewable electricity share, %", companies: used, years: [state.from, state.to], data_status: DATA.dataStatus,
-    rules: "approved A/B values only; each company: latest actual -> disclosed targets by linear interpolation, then held flat (no target: latest actual held); industry_max/avg/min computed per year across companies",
+    basis: "company-wide (GLOBAL) renewable electricity share, %", companies: COS.slice().sort(), industry_companies: mem,
+    industry_rule: state.inclNoTarget ? "all selected companies" : "only companies that disclosed a company-wide RE share target with a target year; companies without one keep their latest actual flat and are shown as their own scenario only",
+    excluded_from_industry: COS.filter(c => !mem.includes(c)).sort().map(c => ({ company_id: c, reason: !state.cos.has(c) ? "deselected by user" : "no company-wide RE share target disclosed" })), years: [state.from, state.to], data_status: DATA.dataStatus,
+    rules: "approved A/B values only; each company: latest actual -> disclosed targets by linear interpolation, then held flat (no target: latest actual held); industry_max/avg/min computed per year across industry_companies",
     scenarios: scen,
-    regional_notes: { note: "Regional (country) disclosures are NOT applied to the scenarios; listed for reference only.", disclosures: DATA.regional.filter(d => used.includes(d.company_id)) },
-    evidence: { actuals: BM.evidence.filter(e => e.kind === "실적" && e.geo === "GLOBAL" && used.includes(e.co)), targets: BM.evidence.filter(e => e.kind === "목표" && e.geo === "GLOBAL" && used.includes(e.co)), reference_contracts: (DATA.contracts || []).filter(k => used.includes(k.company_id)) },
+    regional_notes: { note: "Regional (country) disclosures are NOT applied to the scenarios; listed for reference only.", disclosures: DATA.regional },
+    evidence: { actuals: BM.evidence.filter(e => e.kind === "실적" && e.geo === "GLOBAL"), targets: BM.evidence.filter(e => e.kind === "목표" && e.geo === "GLOBAL"), reference_contracts: DATA.contracts || [] },
   }, null, 1);
 }
 function renderFootnotes() {
@@ -276,6 +281,7 @@ let last = [];
 function update() {
   if (state.from > state.to) [state.from, state.to] = [state.to, state.from];
   renderKpiYear(); last = compute();
+  document.getElementById("members").textContent = members().map(c => NAME[c]).join(" · ") || "없음";
   renderBars(last); renderChart(last); renderTable(last);
   document.getElementById("preview").textContent = toCsv(last).split("\n").slice(0, 6).join("\n") + "\n…";
 }
@@ -291,6 +297,7 @@ document.getElementById("from").addEventListener("change", e => { state.from = +
 document.getElementById("to").addEventListener("change", e => { state.to = +e.target.value; update(); });
 document.getElementById("scen").addEventListener("change", e => { e.target.checked ? state.show.add(e.target.value) : state.show.delete(e.target.value); update(); });
 document.getElementById("cos").addEventListener("change", e => { e.target.checked ? state.cos.add(e.target.value) : state.cos.delete(e.target.value); update(); });
+document.getElementById("incl-no-target").addEventListener("change", e => { state.inclNoTarget = e.target.checked; update(); });
 document.getElementById("copy-csv").addEventListener("click", () => copy(toCsv(last), "CSV"));
 document.getElementById("copy-json").addEventListener("click", () => copy(toPackage(last), "JSON 시나리오 패키지"));
 </script>
