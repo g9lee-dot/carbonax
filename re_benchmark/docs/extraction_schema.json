@@ -1,0 +1,345 @@
+{
+ "$defs": {
+  "Contract": {
+   "properties": {
+    "country": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Country"
+    },
+    "instrument": {
+     "anyOf": [
+      {
+       "enum": [
+        "total",
+        "onsite",
+        "ppa_physical",
+        "ppa_virtual",
+        "green_tariff",
+        "unbundled_eac",
+        "other",
+        "unspecified"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Instrument"
+    },
+    "technology": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Technology"
+    },
+    "capacity_mw": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Capacity Mw"
+    },
+    "annual_mwh": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Annual Mwh"
+    },
+    "term_years": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Term Years"
+    },
+    "start_year": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Start Year"
+    },
+    "counterparty": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Counterparty"
+    },
+    "page": {
+     "title": "Page",
+     "type": "integer"
+    },
+    "quote": {
+     "title": "Quote",
+     "type": "string"
+    }
+   },
+   "required": [
+    "country",
+    "instrument",
+    "technology",
+    "capacity_mw",
+    "annual_mwh",
+    "term_years",
+    "start_year",
+    "counterparty",
+    "page",
+    "quote"
+   ],
+   "title": "Contract",
+   "type": "object"
+  },
+  "Metric": {
+   "properties": {
+    "data_year": {
+     "title": "Data Year",
+     "type": "integer"
+    },
+    "geography": {
+     "description": "'GLOBAL' for company-wide; ISO-3166 alpha-2 country code; or site name",
+     "title": "Geography",
+     "type": "string"
+    },
+    "geography_level": {
+     "enum": [
+      "global",
+      "region",
+      "country",
+      "site"
+     ],
+     "title": "Geography Level",
+     "type": "string"
+    },
+    "metric": {
+     "enum": [
+      "total_electricity",
+      "re_electricity",
+      "re_ratio",
+      "scope2_market_based",
+      "scope2_location_based"
+     ],
+     "title": "Metric",
+     "type": "string"
+    },
+    "instrument": {
+     "anyOf": [
+      {
+       "enum": [
+        "total",
+        "onsite",
+        "ppa_physical",
+        "ppa_virtual",
+        "green_tariff",
+        "unbundled_eac",
+        "other",
+        "unspecified"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Only for re_electricity; else null",
+     "title": "Instrument"
+    },
+    "value": {
+     "description": "Number exactly as printed in the report (no conversion)",
+     "title": "Value",
+     "type": "number"
+    },
+    "unit": {
+     "description": "Unit exactly as printed, e.g. MWh, GWh, %, tCO2e",
+     "title": "Unit",
+     "type": "string"
+    },
+    "page": {
+     "description": "PDF page number where the value appears (the [PAGE n] marker)",
+     "title": "Page",
+     "type": "integer"
+    },
+    "quote": {
+     "description": "Short verbatim excerpt from that page containing the value, copied exactly",
+     "title": "Quote",
+     "type": "string"
+    }
+   },
+   "required": [
+    "data_year",
+    "geography",
+    "geography_level",
+    "metric",
+    "instrument",
+    "value",
+    "unit",
+    "page",
+    "quote"
+   ],
+   "title": "Metric",
+   "type": "object"
+  },
+  "Target": {
+   "properties": {
+    "geography": {
+     "title": "Geography",
+     "type": "string"
+    },
+    "target_year": {
+     "title": "Target Year",
+     "type": "integer"
+    },
+    "target_re_ratio": {
+     "description": "Target renewable electricity share in %",
+     "title": "Target Re Ratio",
+     "type": "number"
+    },
+    "base_year": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Base Year"
+    },
+    "initiative": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "e.g. RE100, or null",
+     "title": "Initiative"
+    },
+    "scope_note": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Conditions/boundary stated for the target",
+     "title": "Scope Note"
+    },
+    "page": {
+     "title": "Page",
+     "type": "integer"
+    },
+    "quote": {
+     "title": "Quote",
+     "type": "string"
+    }
+   },
+   "required": [
+    "geography",
+    "target_year",
+    "target_re_ratio",
+    "base_year",
+    "initiative",
+    "scope_note",
+    "page",
+    "quote"
+   ],
+   "title": "Target",
+   "type": "object"
+  }
+ },
+ "properties": {
+  "assurance": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "description": "Third-party assurance of energy/GHG data as stated, or null",
+   "title": "Assurance"
+  },
+  "boundary_note": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "description": "Reporting boundary for energy data as stated, or null",
+   "title": "Boundary Note"
+  },
+  "metrics": {
+   "items": {
+    "$ref": "#/$defs/Metric"
+   },
+   "title": "Metrics",
+   "type": "array"
+  },
+  "targets": {
+   "items": {
+    "$ref": "#/$defs/Target"
+   },
+   "title": "Targets",
+   "type": "array"
+  },
+  "contracts": {
+   "items": {
+    "$ref": "#/$defs/Contract"
+   },
+   "title": "Contracts",
+   "type": "array"
+  }
+ },
+ "required": [
+  "assurance",
+  "boundary_note",
+  "metrics",
+  "targets",
+  "contracts"
+ ],
+ "title": "Extraction",
+ "type": "object"
+}

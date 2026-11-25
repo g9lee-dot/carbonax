@@ -198,6 +198,16 @@ Micron은 미국 100%(2025년 말, 달성), 말레이시아·중국 100% 유지,
 
 단위: 전사 RE 전력 비율(%). 업계 수준은 TSMC·SK hynix·Intel 기준. Micron을 포함하면 2030년 업계 평균 51.5%, 최저 13.0%(Micron)입니다.
 
+**업계 최고·평균·최저 계산 방법.** 연도마다 업계 수준 대상 회사(현재 TSMC, SK hynix, Intel)의 경로 값을 놓고 최고값, 단순 산술평균, 최저값을 구합니다. 평균은 회사 규모(전력사용량)로 가중하지 않으며, 세 회사가 같은 비중입니다.
+
+| 연도 | TSMC | SK hynix | Intel | 업계 평균 |
+| --- | --- | --- | --- | --- |
+| 2025 | 20.1 (실적) | 31.0 (실적) | 99.0 (실적) | (20.1 + 31.0 + 99.0) / 3 = 50.0 |
+| 2027 | 36.1 (20.1 → 2030년 60 보간) | 31.5 (2026년 31 → 2030년 33 보간) | 99.4 (99 → 2030년 100 보간) | 55.7 |
+| 2030 | 60.0 (목표) | 33.0 (목표) | 100 (목표) | (60 + 33 + 100) / 3 = 64.3 |
+
+전력사용량 가중평균으로 바꾸면 Intel(약 10 TWh) 대비 SK hynix(13.7 TWh) 등 규모가 큰 회사 비중이 커지지만, TSMC 총 전력사용량이 아직 추출되지 않아 지금은 계산할 수 없습니다.
+
 ## 7. RE 시뮬레이터 연계 검토 포인트
 
 REBM은 "어느 수준까지 가야 하는가(경쟁사 근거)"를, RE 시뮬레이터는 "어떻게, 얼마에 갈 수 있는가"를 담당하도록 나누는 것을 제안합니다. 아래는 RE 시뮬레이터 코드를 보지 않고 작성한 가정 기반 안입니다.
@@ -256,7 +266,7 @@ REBM은 "어느 수준까지 가야 하는가(경쟁사 근거)"를, RE 시뮬�
 - [ ] 추출값 실제 검토 (`review export` → 승인/반려 → `review import`)
 - [ ] 사내 전력수요 전망·배출계수로 더미 대체
 - [ ] RE 시뮬레이터 입력 형식 확인 후 `bm-levels` 시나리오 패키지 형식 조정
-- [ ] Anthropic API 연결로 추출 자동화, 경쟁사 추가 시 매년 갱신
+- [ ] 사내 RAG·LLM으로 추출 연동 (10장), 경쟁사 추가 시 매년 갱신
 
 **파일·명령어 (`re_benchmark/` 기준)**
 
@@ -285,3 +295,102 @@ REBM은 "어느 수준까지 가야 하는가(경쟁사 근거)"를, RE 시뮬�
 - 이 문서 원문(raw): https://raw.githubusercontent.com/g9lee-dot/carbonax/claude/renewable-energy-data-extraction-w445pd/re_benchmark/docs/REBM_guide.md
 
 연계 검토에 필요한 최소 파일은 `re_bm/scenario.py`, `db/schema.sql`, `data/re_benchmark.db`, `data/our_demand_template.csv`, 이 문서입니다. 보고서 PDF(약 55MB)는 근거 확인이 필요할 때만 받으면 됩니다.
+
+## 10. 사내 RAG·LLM으로 추출하기
+
+LLM은 전체 흐름 중 **③ 수치 추출에만** 필요합니다. 나머지(페이지 선별, 점검, 검토, DB, 시나리오·수준 비교)는 LLM 없이 규칙대로 계산하는 코드이며, 같은 입력이면 항상 같은 결과가 나옵니다. 사내 RAG에 ESG 보고서 전문을 인덱싱해 두면 역할은 다음처럼 나뉩니다.
+
+| 역할 | 담당 | 대체하는 기존 단계 |
+| --- | --- | --- |
+| 관련 문단 찾기 | 사내 RAG 검색 | ② RE 페이지 선별(키워드) |
+| 문단을 정해진 JSON으로 옮겨 적기 | 사내 LLM | ③ 수치 추출(Claude API) |
+| 원문 대조·점검·검토·저장·계산 | REBM 코드 | ④~⑦ 그대로 |
+
+**RAG의 질의응답 결과를 그대로 쓰지 않습니다.** 요약된 답에는 페이지·원문 인용이 빠지거나 흐려지고, 연도나 기준(전력 기준 vs 총에너지 기준)이 섞일 수 있습니다(예: Micron은 같은 보고서에 총에너지 기준 10%, 전력 기준 13%). 검색(문단 + 페이지)과 추출(JSON)을 두 단계로 나눕니다.
+
+### 10-1. 인덱싱할 때
+
+- 문단(청크)마다 **문서명, 회사, 발간연도, 페이지 번호**를 메타데이터로 저장합니다. 페이지가 없으면 근거 추적이 안 됩니다.
+- 수치 대부분은 부록 데이터 표에 있습니다. **표는 쪼개지 않고 한 청크로** 두거나, 검색된 청크의 **페이지 전체 텍스트**를 다시 가져올 수 있게 합니다.
+- 청크 텍스트는 보고서 원문 그대로 저장합니다(요약 금지). 원문 대조의 기준이 됩니다.
+
+### 10-2. 검색 질의 (회사별로 모두 실행, 결과 합쳐 중복 제거)
+
+| 목적 | 질의 예 (국문 · 영문 모두) |
+| --- | --- |
+| RE 비율 | 재생에너지 사용률, 재생에너지 비율 / renewable electricity percentage, share of renewable electricity |
+| 전력 사용량 | 전력 사용량, 총 전력 / electricity consumption, purchased electricity, energy consumption MWh GWh |
+| 조달 수단 | PPA, 전력구매계약, REC, 녹색프리미엄, 자가발전 / power purchase agreement, VPPA, renewable energy certificate, green tariff, on-site solar |
+| 목표 | RE100, 재생에너지 목표 / renewable electricity goal target 2030 2040 2050 |
+| 배출량 | Scope 2 시장기반 / Scope 2 market-based location-based |
+| 국가별 | 국가별 재생에너지, 해외 사업장 / renewable electricity by country, site |
+
+질의마다 상위 10~20개 청크를 가져와 페이지 기준으로 묶은 뒤 LLM에 넘깁니다. 한 번에 넘기는 양이 많으면 페이지 묶음 단위로 나눠 여러 번 호출합니다.
+
+### 10-3. LLM 지시문 (시스템 프롬프트)
+
+현재 REBM 코드(`re_bm/extract.py`)에 들어 있는 지시문입니다. 사내 LLM에도 그대로 씁니다.
+
+```text
+You extract renewable-electricity data from a company's sustainability report for a benchmark database.
+
+Rules:
+- Extract only values explicitly printed in the given pages. Never calculate, convert, infer or fill gaps. If a value is absent, omit it.
+- Keep each value and unit exactly as printed. Record the [PAGE n] number where it appears and a short verbatim quote copied character-for-character from that page.
+- Map procurement methods to the instrument taxonomy:
+  onsite = self-generation on company premises; ppa_physical = physical/direct PPA; ppa_virtual = virtual/financial PPA;
+  green_tariff = utility green tariff/green pricing programs (incl. Korea 녹색프리미엄); unbundled_eac = separately purchased certificates (REC, I-REC, GO) not bundled with power;
+  other = anything else (e.g. third-party REC bundled with power, utility default renewable mix claimed); unspecified = method not stated; total = total renewable electricity.
+- Use geography 'GLOBAL' with level 'global' for company-wide figures. Use country codes only when the report states the figure for that country.
+- Electricity-only: exclude renewable heat/fuel figures. If a table mixes energy types, take only electricity rows.
+- Include every reported year shown (e.g. 3-year data tables).
+```
+
+사용자 메시지에는 회사명과 검색된 청크를 페이지 표시와 함께 넣습니다.
+
+```text
+Company: SK hynix
+
+Report pages:
+
+[PAGE 103]
+<그 페이지(또는 청크)의 원문 텍스트>
+
+[PAGE 25]
+<원문 텍스트>
+```
+
+### 10-4. 출력 JSON 형식
+
+출력 형식 정의는 `docs/extraction_schema.json`(JSON Schema)입니다. 사내 LLM이 구조화 출력(JSON 스키마 지정)을 지원하면 이 파일을 그대로 지정하고, 지원하지 않으면 지시문 끝에 "이 스키마에 맞는 JSON만 출력"이라고 붙입니다. 실제 예시는 `data/extractions/*.json`에 있습니다.
+
+```json
+{
+ "assurance": null,
+ "boundary_note": "데이터 범위: 이천, 청주, 분당, 서울, 우시, 충칭",
+ "metrics": [
+  {"data_year": 2025, "geography": "GLOBAL", "geography_level": "global", "metric": "re_ratio",
+   "instrument": null, "value": 31.0, "unit": "%", "page": 103, "quote": "사용률 % 29.6 30.0 29.9 31.0"}
+ ],
+ "targets": [
+  {"geography": "GLOBAL", "target_year": 2030, "target_re_ratio": 33, "base_year": 2020, "initiative": "RE100",
+   "scope_note": "2030 중간 목표", "page": 23, "quote": "재생에너지 사용률 33% 달성을 중간 목표로 수립했습니다."}
+ ],
+ "contracts": []
+}
+```
+
+### 10-5. REBM에 넣기
+
+회사·보고서별 JSON을 저장한 뒤 기존 명령으로 적재합니다. 적재 시 인용문이 원본 PDF 해당 페이지에 실제로 있는지 자동 대조하고(`quote_verified`), 모든 값은 검토 대기 상태로 들어갑니다.
+
+```bash
+python -m re_bm.cli extract skhynix data/reports/skhynix/SK_hynix_Sustainability_Report_2026.pdf --year 2026 --from-json skhynix_2026.json
+python -m re_bm.cli review export      # 검토 → approved/rejected
+python -m re_bm.cli review import
+python -m re_bm.cli bm-levels          # 수준 비교 시나리오
+```
+
+- RAG 청크의 페이지 번호는 **PDF 페이지 순번(1부터)**이어야 원문 대조가 맞습니다. 보고서에 인쇄된 쪽번호와 다를 수 있으니 인덱싱 시 기준을 확인합니다.
+- 원본 PDF를 사내 REBM 환경에 둘 수 없다면, 대조 기준을 RAG 청크 원문으로 바꾸는 작은 수정이 필요합니다(`re_bm/extract.py`의 `quote_on_page`).
+- 결과 확인 방법: `review export`로 나온 CSV에서 `quote_verified=0`이거나 `flags`가 있는 행을 먼저 검토합니다.
